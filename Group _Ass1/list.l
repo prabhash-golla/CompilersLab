@@ -17,8 +17,9 @@ C_CHAR \\[abnrtv"'?\\]
 CHAR_CONST "'"({C_CHAR})+"'"
 S_CHAR \\[abnrtv"'?\\]
 STR_CONST """({S_CHAR})+"""
-PUNC_CLASS "["|"]"|"("|")"|"{"|"}"|"."|"->"|"++"|"--"|"&"|"*"|"+"|"-"|"~"|"!"|"/"|"%"|"<<"|">>"|"<"|">"|"<="|">="|"=="|"!="|"^"|"|"|"&&"|"||"|"?"|":"|";"|"..."|"="|"*="|"/="|"%="|"+="|"-="|"<<="|">>="|"&="|"^="|"|="|","|"#"
-SLCOMMENTS "//"[^/n]*/n
+
+PUNC_CLASS "["|"]"|"("|")"|"{"|"}"|"."|"->"|"++"|"--"|"&"|"*"|"+"|"-"|"~"|"!"|"/"|"%"|"<<"|">>"|"<"|">"|"<="|">="|"=="|"!="|"^"|"|"|"&&"|"||"|"?"|":"|";"|"..."|"="|"*="|"/="|"%="|"+="|"-="|"<<="|">>="|"&="|"^="|"|="|","|"#"|"'"|"\""
+SLCOMMENTS "//"[^\n]*\n
 MLCOMMENTS "/*".*"*/"
 SPACE [ \n\t\r]
 
@@ -27,13 +28,13 @@ SPACE [ \n\t\r]
 {KEYWORDS}          { return KEYWORDS ;}
 {IDENTIFIERS}       {return IDENTIFIERS;}
 {INTEGER_CONSTANTS}  {return INTEGER;}
-{FLOAT_CONSTANSTS}   {return FLOAT;}
-{ENUM_CONST}          {return ENUM;}
+{FLOAT_CONSTANTS}   {return FLOAT;}
+
 {CHAR_CONST}   {return CCHAR;}
-{STR_CONST        }   {return SCHAR;}
-{PUNC_CLASS       }   {return PUNCTUATORS;}
-{SLCOMMENTS       }   {return SCMNT;}
-{MLCOMMENTS       }   {return MLCMNT;}
+{STR_CONST}   {return SCHAR;}
+{PUNC_CLASS}   {return PUNCTUATORS;}
+{SLCOMMENTS}   {return SCMNT;}
+{MLCOMMENTS}   {return MLCMNT;}
 {SPACE}         {}
 
 %% 
