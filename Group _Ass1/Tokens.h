@@ -5,6 +5,6 @@
 #define ENUM     5
 #define CCHAR   6
 #define SCHAR   7
-#define  PUNCTUATORS 8
+#define PUNCTUATORS 8
 #define SCMNT   9
 #define MLCMNT   10

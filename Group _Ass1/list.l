@@ -13,14 +13,14 @@ FRACTIONAL_CONSTANT {DIGIT_SEQUENCE}?\.{DIGIT_SEQUENCE}|{DIGIT_SEQUENCE}\.
 EXPO_PART [Ee][-+]?{DIGIT_SEQUENCE}
 FLOAT_CONSTANTS {FRACTIONAL_CONSTANT}{EXPO_PART}?|{DIGIT_SEQUENCE}{EXPO_PART}
 ENUM_CONST {IDENTIFIERS}
-C_CHAR \\[abnrtv"'?\\]
+ESCAPE_CHAR \\[abnrtv"'?\\]
+C_CHAR [^'\\\n]|{ESCAPE_CHAR}
 CHAR_CONST "'"({C_CHAR})+"'"
-S_CHAR \\[abnrtv"'?\\]
-STR_CONST """({S_CHAR})+"""
-
-PUNC_CLASS "["|"]"|"("|")"|"{"|"}"|"."|"->"|"++"|"--"|"&"|"*"|"+"|"-"|"~"|"!"|"/"|"%"|"<<"|">>"|"<"|">"|"<="|">="|"=="|"!="|"^"|"|"|"&&"|"||"|"?"|":"|";"|"..."|"="|"*="|"/="|"%="|"+="|"-="|"<<="|">>="|"&="|"^="|"|="|","|"#"|"'"|"\""
+S_CHAR [^"\\\n]|{ESCAPE_CHAR}
+STR_CONST \"({S_CHAR})+\"
+PUNC_CLASS "["|"]"|"("|")"|"{"|"}"|"."|"->"|"++"|"--"|"&"|"*"|"+"|"-"|"~"|"!"|"/"|"%"|"<<"|">>"|"<"|">"|"<="|">="|"=="|"!="|"^"|"|"|"&&"|"||"|"?"|":"|";"|"..."|"="|"*="|"/="|"%="|"+="|"-="|"<<="|">>="|"&="|"^="|"|="|","|"#"
 SLCOMMENTS "//"[^\n]*\n
-MLCOMMENTS "/*".*"*/"
+MLCOMMENTS "/*"([^*]|"*"[^/])*"*/"
 SPACE [ \n\t\r]
 
 %%
@@ -29,7 +29,6 @@ SPACE [ \n\t\r]
 {IDENTIFIERS}       {return IDENTIFIERS;}
 {INTEGER_CONSTANTS}  {return INTEGER;}
 {FLOAT_CONSTANTS}   {return FLOAT;}
-
 {CHAR_CONST}   {return CCHAR;}
 {STR_CONST}   {return SCHAR;}
 {PUNC_CLASS}   {return PUNCTUATORS;}
