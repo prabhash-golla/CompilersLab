@@ -66,7 +66,10 @@ int main() {
                 break; 
             }
             default:
+            {
+                printf("< OTHERS : %s >\n ",yytext);
                 break;
+            }
         
         }
     }

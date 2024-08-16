@@ -25,16 +25,17 @@ SPACE [ \n\t\r]
 
 %%
 
-{KEYWORDS}          { return KEYWORDS ;}
+{KEYWORDS}          {return KEYWORDS ;}
 {IDENTIFIERS}       {return IDENTIFIERS;}
-{INTEGER_CONSTANTS}  {return INTEGER;}
+{INTEGER_CONSTANTS} {return INTEGER;}
 {FLOAT_CONSTANTS}   {return FLOAT;}
-{CHAR_CONST}   {return CCHAR;}
-{STR_CONST}   {return SCHAR;}
-{PUNC_CLASS}   {return PUNCTUATORS;}
-{SLCOMMENTS}   {return SCMNT;}
-{MLCOMMENTS}   {return MLCMNT;}
-{SPACE}         {}
+{CHAR_CONST}        {return CCHAR;}
+{STR_CONST}         {return SCHAR;}
+{PUNC_CLASS}        {return PUNCTUATORS;}
+{SLCOMMENTS}        {return SCMNT;}
+{MLCOMMENTS}        {return MLCMNT;}
+{SPACE}             {}
+.                   {return OTHERS;}
 
 %% 
 

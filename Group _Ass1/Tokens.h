@@ -8,3 +8,4 @@
 #define PUNCTUATORS 8
 #define SCMNT   9
 #define MLCMNT   10
+#define OTHERS 11
