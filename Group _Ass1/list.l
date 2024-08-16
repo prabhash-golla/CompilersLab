@@ -9,13 +9,32 @@ NONZDIGITS [1-9]
 DIGITS [0-9]
 INTEGER_CONSTANTS [-]?({DIGITS})+
 DIGIT_SEQUENCE ({DIGITS})+
-FRACTIONAL_CONSTANT {DIGIT_SEQUENCE}?/.
-FLOAT_CONSTANSTS ()+
-
+FRACTIONAL_CONSTANT {DIGIT_SEQUENCE}?\.{DIGIT_SEQUENCE}|{DIGIT_SEQUENCE}\.
+EXPO_PART [Ee][-+]?{DIGIT_SEQUENCE}
+FLOAT_CONSTANTS {FRACTIONAL_CONSTANT}{EXPO_PART}?|{DIGIT_SEQUENCE}{EXPO_PART}
+ENUM_CONST {IDENTIFIERS}
+C_CHAR \\[abnrtv"'?\\]
+CHAR_CONST "'"({C_CHAR})+"'"
+S_CHAR \\[abnrtv"'?\\]
+STR_CONST """({S_CHAR})+"""
+PUNC_CLASS "["|"]"|"("|")"|"{"|"}"|"."|"->"|"++"|"--"|"&"|"*"|"+"|"-"|"~"|"!"|"/"|"%"|"<<"|">>"|"<"|">"|"<="|">="|"=="|"!="|"^"|"|"|"&&"|"||"|"?"|":"|";"|"..."|"="|"*="|"/="|"%="|"+="|"-="|"<<="|">>="|"&="|"^="|"|="|","|"#"
+SLCOMMENTS "//"[^/n]*/n
+MLCOMMENTS "/*".*"*/"
+SPACE [ \n\t\r]
 
 %%
 
-
+{KEYWORDS}          { return KEYWORDS ;}
+{IDENTIFIERS}       {return IDENTIFIERS;}
+{INTEGER_CONSTANTS}  {return INTEGER;}
+{FLOAT_CONSTANSTS}   {return FLOAT;}
+{ENUM_CONST}          {return ENUM;}
+{CHAR_CONST}   {return CCHAR;}
+{STR_CONST        }   {return SCHAR;}
+{PUNC_CLASS       }   {return PUNCTUATORS;}
+{SLCOMMENTS       }   {return SCMNT;}
+{MLCOMMENTS       }   {return MLCMNT;}
+{SPACE}         {}
 
 %% 
 

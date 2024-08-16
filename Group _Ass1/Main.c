@@ -11,7 +11,7 @@ int main() {
 
     while(nextToken = yylex())
     {
-        printf("%d\n",nextToken);
+        printf("%d => %s\n",nextToken,yytext);
     }
 
     return 0;
