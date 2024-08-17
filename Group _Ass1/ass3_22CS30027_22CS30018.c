@@ -1,8 +1,12 @@
 #include <stdio.h>
 #include "lex.yy.c" 
 
+/*
+    Group :- TinyC-67
+    Golla Meghanandh Manvith Prabhash :- 22CS30027
+    Darapu Adhithya  :- 22CS30018
+*/
 
-// Main function
 int main() {
 
     int nextToken;
@@ -29,12 +33,12 @@ int main() {
             }
             case FLOAT:
             {
-                printf("<  : %s >\n",yytext); 
+                printf("< FLOAT : %s >\n",yytext); 
                 break;             
             }
             case ENUM:
             {
-                printf("< FLOAT : %s >\n",yytext); 
+                printf("< ENUMERATION CONSTANT : %s >\n",yytext); 
                 break;
             }
             case CCHAR :
@@ -49,7 +53,7 @@ int main() {
             }
             case PUNCTUATORS :
             {
-                printf("< PUNCTUATOR : %s >\n",yytext); 
+                printf("< PUNCTUATOR : \"%s\" >\n",yytext); 
                 break;            
             }
             case SCMNT:
