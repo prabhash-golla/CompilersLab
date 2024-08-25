@@ -6,13 +6,13 @@
 */
 int main()
 {
-    int x = -10;           //INTEGER
+    int x = 010;           //INTEGER
     float y = 3.1415;      //FLOAT
     char c = 'P';          //CHAR
     char d = '\n';
     char e = '\"';
     char f = '\'';
-    enum months {JAN,FEB,MAR,APR,MAY,JUN,JUL,AUG,SEP,OCT,NOV,DEC}; //ENUMERATION
+    // enum months {JAN,FEB,MAR,APR,MAY,JUN,JUL,AUG,SEP,OCT,NOV,DEC}; //ENUMERATION
     char g[20] = "TinyC-67"; //STRING
     char h[20] = "\'\"\?\\\a\b\f\n\r\t\v"; //SPEACIAL CASE
     while(x<0)

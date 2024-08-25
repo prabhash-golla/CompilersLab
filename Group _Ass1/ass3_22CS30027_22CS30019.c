@@ -47,11 +47,11 @@ int main() {
             }
 
             // Case for enumeration constant tokens
-            case ENUM:
-            {
-                printf("< ENUMERATION CONSTANT : %s >\n", yytext); 
-                break;
-            }
+            // case ENUM:
+            // {
+            //     printf("< ENUMERATION CONSTANT : %s >\n", yytext); 
+            //     break;
+            // }
 
             // Case for character literal tokens
             case CCHAR:
