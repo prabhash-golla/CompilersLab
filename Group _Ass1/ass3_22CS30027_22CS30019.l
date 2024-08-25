@@ -35,7 +35,7 @@ CHAR_CONST "'"({C_CHAR})+"'"
 S_CHAR [^"\\\n]|{ESCAPE_CHAR}
 STR_CONST \"(({S_CHAR})+)\"
 PUNC_CLASS "["|"]"|"("|")"|"{"|"}"|"."|"->"|"++"|"--"|"&"|"*"|"+"|"-"|"~"|"!"|"/"|"%"|"<<"|">>"|"<"|">"|"<="|">="|"=="|"!="|"^"|"|"|"&&"|"||"|"?"|":"|";"|"..."|"="|"*="|"/="|"%="|"+="|"-="|"<<="|">>="|"&="|"^="|"|="|","|"#"
-SLCOMMENTS "//"[^\n]*\n
+SLCOMMENTS "//"[^\n]*
 MLCOMMENTS "/*"([^*]|"*"[^/])*"*/"
 SPACE [ \n\t\r]
 
@@ -46,7 +46,6 @@ SPACE [ \n\t\r]
 "enum"                                   {BEGIN(enumerator);return KEYWORDS;}
 <enumerator>"{"                          {return PUNCTUATORS;}
 <enumerator>{ENUM_CONST}                 {return ENUM;}
-<enumerator,INITIAL>{INTEGER_CONSTANTS}  {return INTEGER;}
 <enumerator>","                          {return PUNCTUATORS;}
 <enumerator>"}"                          {BEGIN(INITIAL);return PUNCTUATORS;}
 
