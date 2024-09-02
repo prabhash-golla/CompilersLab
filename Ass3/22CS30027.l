@@ -2,15 +2,18 @@
 #include "y.tab.h"
 #include <string.h>
 #include <stdlib.h>
-#include "22CS30027.h"
 void yyerror();
 int yylex();
 %}
 %%
 "set"   {return SET;}
-[_a-zA-Z][_a-zA-Z0-9]* {yylval.id=strdup(yytext);return ID;}
+[_a-zA-Z][_a-zA-Z0-9]* {
+    // it will not work without strdup if we use we are getting memory leakage
+    yylval.id=strdup(yytext);
+    return ID;
+    }
 [+-]?[0-9]+   {yylval.num=atoi(yytext); return NUM;}
-"**" {return POW;}
+"**"  {return POW;}
 "-"   {return SUB;}
 "+"   {return ADD;}
 "*"   {return MUL;}

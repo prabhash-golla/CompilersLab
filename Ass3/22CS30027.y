@@ -2,18 +2,45 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include "22CS30027.h"
 int yylex();
 void yyerror();
+//extern Stack A;
+
+typedef struct _Ptree{
+    char* oper;
+    int nodeT;
+    struct _Ptree *Left;
+    struct _Ptree *Right;
+} Ptree;
+
+typedef struct _node {
+   char *name;
+   int nocc;
+   struct _node *next;
+} node;
+
+typedef node *nametable;
+
 extern nametable T;
-extern Stack A;
+
+long long Caliculate(Ptree* Tree,nametable VT);
+
+nametable setter ( nametable T, char *id,int num );
+
+int getter (nametable T,char *id);
+
+int power (int a,int b);
+
+void FreeTree (Ptree* Tree);
+
 %}
 
-%union {int num; char* id;}
+%union {int num; char* id;Ptree* node;}
 %start PROGRAM
 %token <num> NUM SET POW SUB ADD MUL DIV MOD LP RP
 %token <id> ID
-%type <num> STMT PROGRAM SETSTMT EXPRSTMT OP ARG EXPR
+%type <num> STMT PROGRAM SETSTMT EXPRSTMT 
+%type <node> OP ARG EXPR
 
 %%
 PROGRAM: STMT PROGRAM
@@ -24,21 +51,17 @@ STMT: SETSTMT
     ;
 SETSTMT: LP SET ID NUM RP {T=setter(T,$3,$4);}
     | LP SET ID ID RP {T=setter(T,$3,getter(T,$4));}
-    | LP SET ID EXPR RP {T=setter(T,$3,Caliculate(top(&A),T)); FreeTree(top(&A));pop(&A);}
+    | LP SET ID EXPR RP {T=setter(T,$3,Caliculate($4,T));free($4->oper);free($4);}
     ;
-EXPRSTMT: EXPR {printf("Standalone expression evaluates to %d\n", $$=Caliculate(top(&A),T)); pop(&A);}
+EXPRSTMT: EXPR {printf("Standalone expression evaluates to %d\n", $$=Caliculate($1,T));free($1->oper);free($1);}
     ;
 EXPR: LP OP ARG ARG RP {
-                Ptree* R = top(&A); pop(&A);
-                Ptree* L = top(&A); pop(&A);
-                Ptree* N = top(&A); pop(&A);
-                Ptree* K = (Ptree*)malloc(sizeof(Ptree));
-                K->nodeT = N->nodeT;
-                K->Left = L;
-                K->Right = R;
-                K->oper = N->oper;
-                free(N);
-                push(&A, K);
+                Ptree* R = $4;
+                Ptree* L = $3;
+                Ptree* N = $2;
+                N->Left = L;
+                N->Right = R;
+                $$=N;
             }
     ;
 OP: MUL {
@@ -48,7 +71,7 @@ OP: MUL {
             K->nodeT = 1;
             K->Left = NULL;
             K->Right = NULL;
-            push(&A, K);
+            $$=K;
         }
     | ADD {
             Ptree* K = (Ptree*)malloc(sizeof(Ptree));
@@ -57,7 +80,7 @@ OP: MUL {
             K->nodeT = 1;
             K->Left = NULL;
             K->Right = NULL;
-            push(&A, K);
+            $$=K;
         }
     | SUB {
             Ptree* K = (Ptree*)malloc(sizeof(Ptree));
@@ -66,7 +89,7 @@ OP: MUL {
             K->nodeT = 1;
             K->Left = NULL;
             K->Right = NULL;
-            push(&A, K);
+            $$=K;
         }
     | DIV {
             Ptree* K = (Ptree*)malloc(sizeof(Ptree));
@@ -75,7 +98,7 @@ OP: MUL {
             K->nodeT = 1;
             K->Left = NULL;
             K->Right = NULL;
-            push(&A, K);
+            $$=K;
         }
     | MOD {
             Ptree* K = (Ptree*)malloc(sizeof(Ptree));
@@ -84,7 +107,7 @@ OP: MUL {
             K->nodeT = 1;
             K->Left = NULL;
             K->Right = NULL;
-            push(&A, K);
+            $$=K;
         }
     | POW {
             Ptree* K = (Ptree*)malloc(sizeof(Ptree));
@@ -93,7 +116,7 @@ OP: MUL {
             K->nodeT = 1;
             K->Left = NULL;
             K->Right = NULL;
-            push(&A, K);
+            $$=K;
         }
 ARG: ID {
             Ptree* K = (Ptree*)malloc(sizeof(Ptree));
@@ -102,7 +125,7 @@ ARG: ID {
             K->nodeT = 2;
             K->Left = NULL;
             K->Right = NULL;
-            push(&A, K);
+            $$=K;
         }
     | NUM {
             Ptree* K = (Ptree*)malloc(sizeof(Ptree));
@@ -113,7 +136,7 @@ ARG: ID {
             K->nodeT = 3;
             K->Left = NULL;
             K->Right = NULL;
-            push(&A, K);
+            $$=K;
         }
     | EXPR
     ;
