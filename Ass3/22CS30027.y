@@ -4,7 +4,7 @@
 #include <string.h>
 
 int yylex();  // Function declaration for the lexer
-void yyerror(); // Function declaration for error handling
+void yyerror(char* s); // Function declaration for error handling
 
 // Define the structure for the parse tree node
 typedef struct _Ptree {
@@ -162,6 +162,6 @@ ARG:
 %%
 
 // Error handling function
-void yyerror() {
-    printf("Error\n"); // Print a generic error message
+void yyerror(char* s) {
+    printf("Error : %s \n",s); // Print a generic error message
 }

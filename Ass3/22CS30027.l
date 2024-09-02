@@ -3,7 +3,7 @@
 #include <string.h>   // Include for string manipulation functions
 #include <stdlib.h>   // Include for memory allocation functions
 
-void yyerror();      // Function declaration for error handling
+void yyerror(char * s);      // Function declaration for error handling
 int yylex();        // Function declaration for the lexer
 %}
 
