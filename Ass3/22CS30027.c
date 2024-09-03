@@ -75,6 +75,7 @@ nametable T = NULL; // Global variable for the symbol table
 //     return poppedData;
 // }
 // Function to recursively free a binary tree
+
 void FreeTree(Ptree * T) {
     if (T == NULL) return; // Base case: empty tree
 
@@ -103,8 +104,24 @@ long long Caliculate(Ptree * Tree, nametable VT) {
         if (strcmp(Tree -> oper, "*") == 0) ans = (left) * (right);
         else if (strcmp(Tree -> oper, "+") == 0) ans = (left) + (right);
         else if (strcmp(Tree -> oper, "-") == 0) ans = left - right;
-        else if (strcmp(Tree -> oper, "/") == 0) ans = left / right;
-        else if (strcmp(Tree -> oper, "%") == 0) ans = left % right;
+        else if (strcmp(Tree -> oper, "/") == 0) 
+        {
+            if(right==0)
+            {
+                printf("Error Can't Divide %lld by 0\n",left);
+                exit(EXIT_FAILURE);
+            }
+            ans = left / right;
+        }
+        else if (strcmp(Tree -> oper, "%") == 0) 
+        {
+            if(right==0)
+            {
+                printf("Error Can't find modulo %lld by 0\n",left);
+                exit(EXIT_FAILURE);
+            }
+            ans = left % right;
+        }
         else if (strcmp(Tree -> oper, "**") == 0) ans = power(left, right);
 
         // Free the subtrees and reset pointers to avoid dangling references
@@ -117,14 +134,7 @@ long long Caliculate(Ptree * Tree, nametable VT) {
     }
 
     case 2: { // Node with an identifier
-        node * p = VT;
-        // Traverse the symbol table to find the value of the identifier
-        while (p) {
-            if (!strcmp(p -> name, Tree -> oper)) {
-                return p -> nocc;
-            }
-            p = p -> next;
-        }
+        return  getter(VT,Tree->oper);
         break;
     }
 
@@ -185,8 +195,8 @@ int getter(nametable T, char * id) {
         }
         p = p -> next;
     }
-    printf("Error the Variable %s not declared yet\n", id); // Variable not found
-    return 0;
+    printf("Error the Variable %s not declared yet But tried To Access\n", id); // Variable not found
+    exit(EXIT_FAILURE);
 }
 
 // Function to free all nodes in the symbol table

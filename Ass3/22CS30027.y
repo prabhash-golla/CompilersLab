@@ -17,7 +17,7 @@ typedef struct _Ptree {
 // Define the structure for a symbol table entry
 typedef struct _node {
     char *name;          // Name of the variable
-    int nocc;           // Value associated with the variable
+    long long nocc;           // Value associated with the variable
     struct _node *next; // Pointer to the next node in the symbol table
 } node;
 
