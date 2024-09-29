@@ -1,9 +1,12 @@
-all: tinyC
+run:  tinyC2_22CS30027_22CS30019.out
+	./tinyC2_22CS30027_22CS30019.out < input_22CS30027_22CS30019.c
 
-tinyC: tinyC2_22CS30027_22CS30019.l tinyC2_22CS30027_22CS30019.y tinyC2_22CS30019_22CS30027.c    
-	yacc -d tinyC2_22CS30027_22CS30019.y    
-	flex tinyC2_22CS30027_22CS30019.l    
-	gcc -o tinyC tinyC2_22CS30019_22CS30027.c
-	
-clean:    
-	rm -f tinyC lex.yy.c y.tab.c y.tab.h
+tinyC2_22CS30027_22CS30019.out: all
+
+all:
+	yacc -d tinyC2_22CS30027_22CS30019.y 
+	lex tinyC2_22CS30027_22CS30019.l
+	gcc -g -o tinyC2_22CS30027_22CS30019.out tinyC2_22CS30019_22CS30027.c
+
+clean:
+	rm lex.yy.c y.tab.c y.tab.h *.out

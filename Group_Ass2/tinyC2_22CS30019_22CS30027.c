@@ -1,7 +1,7 @@
 #include<stdio.h>
 #include "lex.yy.c"
-#include "y.tab.h"
-extern int yyparse();
+#include "y.tab.c" 
+// int yyparse();
 int main()
 {
     yyparse();

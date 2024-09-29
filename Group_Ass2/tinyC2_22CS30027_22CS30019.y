@@ -3,7 +3,7 @@
     #include <stdlib.h>
     #include <string.h>
 
-    extern int yylex();
+    int yylex();
     void yyerror(char *ERRORS);
 
     // Node structure for the parse tree
@@ -23,16 +23,25 @@
 
     void printTree(Node *node, int level) {
         if (node == NULL) return;
-        for (int i = 0; i < level; i++) printf("   ");
-        printf("%s\n", node->value);
-        printTree(node->right, level + 1);
-        printTree(node->left, level + 1);
+        if(strcmp(node->value,"ignore"))
+        {
+            for (int i = 0; i < level-1; i++) printf("\t");
+            if(level>0) printf("%d-->",level);
+            printf("%s\n", node->value);
+            printTree(node->left, level + 1);
+            printTree(node->right, level + 1);
+        }
+        else
+        {
+            printTree(node->left, level);
+            printTree(node->right, level);
+        }
     }
 %}
 
 %union {
     int INTVAL;
-    Node *node;
+    struct _Node *node;
 }
 
 /*_______ COMMENTS ________*/
@@ -146,7 +155,7 @@
 
 %type<node> additive_expression argument_expression_list and_expression assignment_expression assignment_expression_opt block_item block_item_list block_item_list_opt cast_expression conditional_expression constant constant_expression declaration declaration_list declaration_list_opt declaration_specifiers declarator designator designator_list designation designation_opt direct_declarator exclusive_or_expression expression expression_opt external_declaration function_definition function_specifier identifier_list identifier_list_opt inclusive_or_expression initializer initializer_list init_declarator init_declarator_list iteration_statement jump_statement logical_and_expression logical_or_expression multiplicative_expression parameter_declaration parameter_list parameter_type_list pointer postfix_expression primary_expression relational_expression selection_statement specifier_qualifier_list shift_expression storage_class_specifier statement
 %type<node> unary_expression unary_operator type_name type_qualifier type_qualifier_list type_qualifier_list_opt type_specifier equality_expression labeled_statement compound_statement expression_statement translation_unit 
-%start translation_unit
+%start start_symbol
 
 %%
 
@@ -162,9 +171,9 @@ constant : INTEGER { $$ = createNode("INTEGER", NULL, NULL); }
          ;
 
 primary_expression : IDENTIFIER { $$ = createNode("IDENTIFIER", NULL, NULL); }
-                   | constant
+                   | constant   { $$ = createNode("constant",$1,NULL); }
                    | STRING_LITERAL { $$ = createNode("STRING_LITERAL", NULL, NULL); }
-                   | ROUND_BRACKET_OPEN expression ROUND_BRACKET_CLOSE { $$ = createNode("PRIMARY_EXPRESSION", $2, NULL); }
+                   | ROUND_BRACKET_OPEN expression ROUND_BRACKET_CLOSE { $$ = createNode("primary_expression", $2, NULL); }
                    ;
 
 /*_______ POSTFIX EXPRESSIONS ________*/
@@ -323,8 +332,14 @@ declaration : declaration_specifiers SEMICOLON { $$ = createNode("declaration", 
 
 /*_______ DECLARATION SPECIFIER ________*/
 
-declaration_specifiers : storage_class_specifier | type_specifier | type_qualifier | function_specifier {$$ = createNode("declaration_specifier", $1, NULL);};
-                        |storage_class_specifier declaration_specifiers | type_specifier declaration_specifiers | type_qualifier declaration_specifiers | function_specifier declaration_specifiers {$$ = createNode("declaration_specifiers", $1, $2);};
+declaration_specifiers : storage_class_specifier {$$ = createNode("declaration_specifier", $1, NULL);};
+                        | type_specifier {$$ = createNode("declaration_specifier", $1, NULL);};
+                        | type_qualifier {$$ = createNode("declaration_specifier", $1, NULL);};
+                        | function_specifier {$$ = createNode("declaration_specifier", $1, NULL);};
+                        |storage_class_specifier declaration_specifiers {$$ = createNode("declaration_specifiers", $1, $2);};
+                        | type_specifier declaration_specifiers {$$ = createNode("declaration_specifiers", $1, $2);};
+                        | type_qualifier declaration_specifiers {$$ = createNode("declaration_specifiers", $1, $2);};
+                        | function_specifier declaration_specifiers {$$ = createNode("declaration_specifiers", $1, $2);};
 
 /*_______ INIT DECLARATION LIST ________*/
 
@@ -450,23 +465,28 @@ designator : SQUARE_BRACKET_OPEN constant_expression SQUARE_BRACKET_CLOSE  {$$=N
 
 /*_______ STATEMENT ________*/
 
-statement : labeled_statement | compound_statement | expression_statement | selection_statement | iteration_statement | jump_statement {$$=NULL;};
+statement : labeled_statement {$$=$1;}
+            | compound_statement {$$=$1;}
+            | expression_statement {$$=$1;}
+            | selection_statement {$$=$1;}
+            | iteration_statement {$$=$1;}
+            | jump_statement {$$=$1;};
 
 /*_______ LABELED STATEMENT ________*/
 
-labeled_statement : IDENTIFIER COLON statement  {$$=NULL;}
-                    | CASE constant_expression COLON statement  {$$=NULL;}
-                    | DEFAULT COLON statement {$$=NULL;};
+labeled_statement : IDENTIFIER COLON statement  {$$=$$=createNode("labeled_statement",$3,NULL);}
+                    | CASE constant_expression COLON statement  {$$=createNode("labeled_statement",$2,$4);}
+                    | DEFAULT COLON statement {$$=createNode("labeled_statement",$3,NULL);};
 
 /*_______ COMPOUND STATEMENT ________*/
 
-compound_statement : CURLY_BRACKET_OPEN block_item_list_opt CURLY_BRACKET_CLOSE {$$=NULL;};
+compound_statement : CURLY_BRACKET_OPEN block_item_list_opt CURLY_BRACKET_CLOSE {$$=$2;};
 
-block_item_list_opt :   {$$=NULL;} | block_item_list {$$=NULL;};
+block_item_list_opt :   {$$=NULL;} | block_item_list {$$=createNode("block_item_list",$1,NULL);};
 
 /*_______ BLOCK ITEM LIST ________*/
 
-block_item_list : block_item  {$$=$1;}| block_item_list block_item {$$=NULL;};
+block_item_list : block_item  {$$=$1;}| block_item_list block_item {$$=createNode("ignore",$1,$2);};
 
 /*_______ BLOCK ITEM ________*/
 
@@ -474,15 +494,15 @@ block_item : declaration  {$$=$1;} | statement {$$=$1;};
 
 /*_______ EXPRESSION STATEMENT ________*/
 
-expression_statement : expression_opt SEMICOLON {$$=NULL;};
+expression_statement : expression_opt SEMICOLON {$$=$1;};
 
-expression_opt :   {$$=NULL;} | expression  {$$=NULL;}
+expression_opt :   {$$=NULL;} | expression  {$$=$1;}
 
 /*_______ SELECTION STATEMENT ________*/
 
-selection_statement : IF ROUND_BRACKET_OPEN expression ROUND_BRACKET_CLOSE statement %prec THEN {$$=NULL;}
-                    | IF ROUND_BRACKET_OPEN expression ROUND_BRACKET_CLOSE statement ELSE statement {$$=NULL;}
-                    | SWITCH ROUND_BRACKET_OPEN expression ROUND_BRACKET_CLOSE statement {$$=NULL;};
+selection_statement : IF ROUND_BRACKET_OPEN expression ROUND_BRACKET_CLOSE statement %prec THEN {$$=createNode("selection_statement",createNode("IF",$3,NULL),createNode("THEN",$5,NULL));}
+                    | IF ROUND_BRACKET_OPEN expression ROUND_BRACKET_CLOSE statement ELSE statement {$$=createNode("selection_statement",createNode("IF",$3,NULL),createNode("ignore",createNode("THEN",$5,NULL),createNode("ELSE",$7,NULL)));}
+                    | SWITCH ROUND_BRACKET_OPEN expression ROUND_BRACKET_CLOSE statement {$$=createNode("selection_statement",createNode("SWITCH",$3,NULL),createNode("THEN",$5,NULL));};
 
 /*_______ ITERATION STATEMENT ________*/
 
@@ -504,6 +524,8 @@ jump_statement : GOTO IDENTIFIER SEMICOLON   {$$=createNode("jump_statement",NUL
 
 /*_______ TRANSLATION UNIT ________*/
 
+start_symbol : translation_unit {printTree($1,0);}
+
 translation_unit : external_declaration {$$=$1;}
                  | translation_unit external_declaration {$$=createNode("translation_unit",$1,$2);};
 
@@ -514,15 +536,15 @@ external_declaration : function_definition {$$=$1;}
 
 /*_______ FUNCTION DEFINITION ________*/
 
-function_definition : declaration_specifiers declarator declaration_list_opt compound_statement {printf("FUNCTION_DEFINITION\n");};
+function_definition : declaration_specifiers declarator declaration_list_opt compound_statement {$$=createNode("function_definition",createNode("ignore",$1,$2),createNode("ignore",$3,$4));};
 
 declaration_list_opt :  {$$=NULL;}
-                     | declaration_list {$$=$1;};
+                     | declaration_list {$$=createNode("declaraation_list",$1,NULL);};
 
 /*_______ DECLARATION LIST ________*/
 
 declaration_list : declaration {$$=$1;}
-                 | declaration_list declaration {$$=createNode("declaraation_list",$1,$2);};
+                 | declaration_list declaration {$$=createNode("ignore",$1,$2);};
 
 
 

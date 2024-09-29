@@ -1,6 +1,6 @@
 %{
 	#include "y.tab.h"
-	extern void yyerror(const char *);
+	extern void yyerror(char *);
 %}
 
 
@@ -46,7 +46,7 @@ STRING_LITERAL				"\""{S_CHAR_SEQUENCE}?"\""
 
 /*_______ WHITE SPACE ________*/
 
-WS							[\t\v\n\f]
+WS							[ \t\v\n\f]
 
 
 
