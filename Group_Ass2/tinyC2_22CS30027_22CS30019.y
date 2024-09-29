@@ -432,16 +432,17 @@ designation_opt : designation  {$$=$1;}
 
 /*_______ DESIGNATION ________*/
 
-designation : designator_list ASSIGN {$$=NULL;};
+designation : designator_list ASSIGN {$$=createNode("designation",$1,NULL);};
 
 /*_______ DESIGNATOR LIST ________*/
 
-designator_list : designator | designator_list designator {$$=NULL;};
+designator_list : designator {$$=createNode("designator_list",$1,NULL);}
+                | designator_list designator {$$=createNode("designator_list",$1,$2);};
 
 /*_______ DESIGNATOR ________*/
 
-designator : SQUARE_BRACKET_OPEN constant_expression SQUARE_BRACKET_CLOSE  {$$=NULL;}
-             | DOT IDENTIFIER {$$=NULL;};
+designator : SQUARE_BRACKET_OPEN constant_expression SQUARE_BRACKET_CLOSE  {$$=createNode("designator",$2,NULL);}
+             | DOT IDENTIFIER {$$=createNode("designator",NULL,NULL)};
 
 
 
@@ -454,15 +455,15 @@ statement : labeled_statement | compound_statement | expression_statement | sele
 
 /*_______ LABELED STATEMENT ________*/
 
-labeled_statement : IDENTIFIER COLON statement  {$$=NULL;}
-                    | CASE constant_expression COLON statement  {$$=NULL;}
-                    | DEFAULT COLON statement {$$=NULL;};
+labeled_statement : IDENTIFIER COLON statement  {$$=createNode("statement",$3,NULL);}
+                    | CASE constant_expression COLON statement  {$$=createNode("statement",$2,$4);}
+                    | DEFAULT COLON statement {$$=createNode("statement",$3,NULL);};
 
 /*_______ COMPOUND STATEMENT ________*/
 
-compound_statement : CURLY_BRACKET_OPEN block_item_list_opt CURLY_BRACKET_CLOSE {$$=NULL;};
+compound_statement : CURLY_BRACKET_OPEN block_item_list_opt CURLY_BRACKET_CLOSE {$$=createNode("compound_statement",$2,NULL);};
 
-block_item_list_opt :   {$$=NULL;} | block_item_list {$$=NULL;};
+block_item_list_opt :   {$$=NULL;} | block_item_list {$$=$1;};
 
 /*_______ BLOCK ITEM LIST ________*/
 
@@ -474,9 +475,9 @@ block_item : declaration  {$$=$1;} | statement {$$=$1;};
 
 /*_______ EXPRESSION STATEMENT ________*/
 
-expression_statement : expression_opt SEMICOLON {$$=NULL;};
+expression_statement : expression_opt SEMICOLON {$$=createNode("expression_statement",$1,NULL);};
 
-expression_opt :   {$$=NULL;} | expression  {$$=NULL;}
+expression_opt :   {$$=NULL;} | expression  {$$=$1;}
 
 /*_______ SELECTION STATEMENT ________*/
 
