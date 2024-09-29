@@ -447,16 +447,17 @@ designation_opt : designation  {$$=$1;}
 
 /*_______ DESIGNATION ________*/
 
-designation : designator_list ASSIGN {$$=NULL;};
+designation : designator_list ASSIGN {$$=createNode("designation",$1,NULL);};
 
 /*_______ DESIGNATOR LIST ________*/
 
-designator_list : designator | designator_list designator {$$=NULL;};
+designator_list : designator {$$=createNode("designator_list",$1,NULL);}
+                | designator_list designator {$$=createNode("designator_list",$1,$2);};
 
 /*_______ DESIGNATOR ________*/
 
-designator : SQUARE_BRACKET_OPEN constant_expression SQUARE_BRACKET_CLOSE  {$$=NULL;}
-             | DOT IDENTIFIER {$$=NULL;};
+designator : SQUARE_BRACKET_OPEN constant_expression SQUARE_BRACKET_CLOSE  {$$=createNode("designator",$2,NULL);}
+             | DOT IDENTIFIER {$$=createNode("designator",NULL,NULL);};
 
 
 
