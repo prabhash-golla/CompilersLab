@@ -106,7 +106,7 @@ void printPTree(Ptree *node, int level) {
         if(strcmp(node->value,"ignore"))
         {
             for (int i = 0; i < level-1; i++) printf("  ");
-            if(level>0) printf("%d   ==> ",level);
+            if(level>0) printf("  ==> ");
             printf("%s [", node->value);
             if(!strcmp("M",node->value))
             {
@@ -272,7 +272,7 @@ void DonePTree(Ptree* node)
     printf("\n");
     for(int i=-5;i<6;i++)
     {
-        printf("+++ f(%d) = %lld\n",i,evalpoly(node,i));
+        printf("+++ f(%2d) = %19lld\n",i,evalpoly(node,i));
     }
     printf("\n+++ f'(x) =");
     printderivative(node);
