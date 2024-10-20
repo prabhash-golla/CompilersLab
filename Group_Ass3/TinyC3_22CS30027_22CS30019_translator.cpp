@@ -349,6 +349,32 @@ string checkType(SType* S)
     return "unknown";
 }
 
+Expression* btoi(Expression* E)
+{
+    if(E->Type=="bool")
+    {
+        E->LocalST = SymbolTable::GenTemp(new SType("int"));
+        BackPath(E->TrueList,QuadList.InstructionList.size());
+        QuadArray::Emit("=",E->LocalST->Name,"true");
+        QuadArray::Emit("goto",itos(QuadList.InstructionList.size()));
+        BackPath(E->FalseList,QuadList.InstructionList.size());
+        QuadArray::Emit("=",E->LocalST->Name,"false");
+    }
+    return E;
+}
+
+Expression* itob(Expression* E)
+{
+    if(E->Type!="bool")
+    {
+        E->FalseList  = MakeList(QuadList.InstructionList.size());
+        emit("==",E->LocalST->Name,"0");
+        E->TrueList  = MakeList(QuadList.InstructionList.size());
+        emit("goto","");
+    }
+    return E;
+}
+
 int main()
 {
     SymbolTableCount = 0;

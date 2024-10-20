@@ -148,5 +148,7 @@ int SizeOfS(SType* S);
 string itos(int i);
 string ftos(float f);
 string checkType(SType* S);
+Expression* itob(Expression* E);
+Expression* btoi(Expression* E);
 
 #endif
