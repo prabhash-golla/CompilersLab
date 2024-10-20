@@ -113,7 +113,7 @@ class QuadArray
     public:
         vector<Quad> InstructionList;
 
-        static void Emit(string Op_,string Result_,string Arg1_,string Arg2_="");
+        static void Emit(string Op_,string Result_,string Arg1_="",string Arg2_="");
         static void Emit(string Op_,string Result_,int Arg1_,string Arg2_="");
         static void Emit(string Op_,string Result_,float Arg1_,string Arg2_="");
         void Print();

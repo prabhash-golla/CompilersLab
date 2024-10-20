@@ -368,9 +368,9 @@ Expression* itob(Expression* E)
     if(E->Type!="bool")
     {
         E->FalseList  = MakeList(QuadList.InstructionList.size());
-        emit("==",E->LocalST->Name,"0");
+        QuadArray::Emit("==",E->LocalST->Name,"0");
         E->TrueList  = MakeList(QuadList.InstructionList.size());
-        emit("goto","");
+        QuadArray::Emit("goto","");
     }
     return E;
 }
