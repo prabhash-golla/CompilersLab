@@ -244,10 +244,10 @@ void QuadArray::Emit(string Op_,string Result_,float Arg1_,string Arg2_)
     QuadList.InstructionList.push_back(*Q);
 }
 
-list<int>* MakeList(int i)
+list<int> MakeList(int i)
 {
     list<int> l(1,i);
-    return &l;
+    return l;
 } 
 
 list<int>* Merge(list<int> &p1,list<int> &p2)
@@ -319,7 +319,7 @@ string itos(int i)
     s << i;
     return s.str();
 }
-
+emit
 string ftos(float f)
 {
     stringstream s;
