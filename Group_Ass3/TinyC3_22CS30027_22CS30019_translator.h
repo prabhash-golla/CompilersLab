@@ -89,7 +89,7 @@ class Symbol
         
         //Functions
         //Constructor 
-        Symbol(string Name_,string Type_=NULL,int Width_ = 0,SType* ArrType = NULL);
+        Symbol(string Name_,string Type_="int",int Width_ = 0,SType* ArrType = NULL);
         Symbol* Convert(string S);
         Symbol* Update(SType* Type_);
 };

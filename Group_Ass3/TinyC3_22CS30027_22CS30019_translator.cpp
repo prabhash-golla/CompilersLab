@@ -3,6 +3,7 @@
 #include <fstream>
 #include <sstream>
 #include <stack>
+#include <iomanip> 
 #include "lex.yy.c"
 #include "y.tab.c" 
 using namespace std;
@@ -42,9 +43,9 @@ Symbol* Symbol::Update(SType* Type_)
 
 SymbolTable::SymbolTable(string Name_,SymbolTable* Ptr_): Name(Name_),NumTempVar(0){}
 
-Symbol* SymbolTable::GenTemp(string Type_,string InitialVal)
+Symbol* SymbolTable::GenTemp(SType* Type_,string InitialVal)
 {
-    string Name = "t" + itos(NumTempVar++);
+    string Name = "t" + itos(CurrentST->NumTempVar++);
     Symbol* S = new Symbol(Name);
     S->Type = Type_;
     S->InitialValue = InitialVal;
@@ -53,14 +54,14 @@ Symbol* SymbolTable::GenTemp(string Type_,string InitialVal)
     return &(CurrentST->Table.back());
 }
 
-Symbol* SymbolTable::GenTemp(SType* Type_,string InitialVal)
+Symbol* SymbolTable::GenTemp(string Type_,string InitialVal)
 {
-    string Name = "t" + itos(NumTempVar++);
+    string Name = "t" + itos(CurrentST->NumTempVar++);
     Symbol* S = new Symbol(Name);
-    Stype* TempType = new SType(Type_);
+    SType* TempType = new SType(Type_);
     S->Type = TempType;
     S->InitialValue = InitialVal;
-    S->size = SizeOfS(Type_);
+    S->size = SizeOfS(TempType);
     CurrentST->Table.push_back(*S);
     return &(CurrentST->Table.back());
 }
@@ -82,7 +83,7 @@ Symbol* Symbol::Convert(string S)
 
 Symbol* SymbolTable::LookUp(string Name)
 {
-    if(list<Symbol>::iterator it = Table.begin();it!=Table.end();it++)
+    for(list<Symbol>::iterator it = Table.begin();it!=Table.end();it++)
     {
         if(it->Name==Name) return &(*it);
     }
@@ -116,7 +117,7 @@ void SymbolTable::Print()
     cout << left << "Nested" << nl;
 
     list<SymbolTable*> Tab;
-    for(auto it = this->table.begin(); it != this->table.end(); it++) 
+    for(auto it = this->Table.begin(); it != this->Table.end(); it++) 
     {
         cout << left << setw(25) << it->Name;
         cout << left << setw(25) << checkType(it->Type);
@@ -227,19 +228,19 @@ void QuadArray::Print()
 
 void QuadArray::Emit(string Op_,string Result_,string Arg1_,string Arg2_)
 {
-    Quad* Q = new Quad(Result_,Arg1_,Op_,Arg2);
+    Quad* Q = new Quad(Result_,Arg1_,Op_,Arg2_);
     QuadList.InstructionList.push_back(*Q);
 }
 
 void QuadArray::Emit(string Op_,string Result_,int Arg1_,string Arg2_)
 {
-    Quad* Q = new Quad(Result_,Arg1_,Op_,Arg2);
+    Quad* Q = new Quad(Result_,Arg1_,Op_,Arg2_);
     QuadList.InstructionList.push_back(*Q);
 }
 
 void QuadArray::Emit(string Op_,string Result_,float Arg1_,string Arg2_)
 {
-    Quad* Q = new Quad(Result_,Arg1_,Op_,Arg2);
+    Quad* Q = new Quad(Result_,Arg1_,Op_,Arg2_);
     QuadList.InstructionList.push_back(*Q);
 }
 
@@ -287,8 +288,8 @@ bool TypeCheck(Symbol* &E1,Symbol* &E2)
 bool TypeCheck(SType* E1,SType* E2)
 {
     if(E1==NULL & E2==NULL) return true;
-    if(E1==NULL | E2==NULL) return flase;
-    if(E1->Type!=E2->Type) return flase;
+    if(E1==NULL | E2==NULL) return false;
+    if(E1->Type!=E2->Type) return false;
     return TypeCheck(E1->ArrType,E2->ArrType);
 }
 
@@ -305,7 +306,7 @@ int SizeOfS(SType* S)
     else if(S->Type == "float")
         return _FLOATSIZE;
     else if(S->Type == "arr")
-        return t->width * sizeoft(t->arrtype);
+        return S->Width * SizeOfS(S->ArrType);
     else if(S->Type == "func")
         return _FUNCSIZE;
     else
