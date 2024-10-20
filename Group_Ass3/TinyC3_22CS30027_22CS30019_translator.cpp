@@ -26,7 +26,7 @@ string VarType;
 SType::SType(string Type_,int Width_,SType* ArrType_):
 Type(Type),Width(Width_),ArrType(ArrType_) {}
 
-Symbol::Symbol(string Name_,SType* Type_,int Width_,SType* ArrType):
+Symbol::Symbol(string Name_,string Type_,int Width_,SType* ArrType):
 Name(Name_),offset(0),NestedTable(NULL),InitialValue("-")
 {
     Type = new SType(Type_,Width_,ArrType);

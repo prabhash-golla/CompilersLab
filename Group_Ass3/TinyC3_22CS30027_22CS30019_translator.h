@@ -42,7 +42,7 @@ class Statement
 {
     public:
         list<int> NextList;
-}
+};
 
 // Array Class
 class ArrayType
@@ -52,7 +52,7 @@ class ArrayType
         Symbol* Location;
         Symbol* Array;
         SType* Type;
-}
+};
 
 
 //Symbol Table Class
@@ -89,7 +89,7 @@ class Symbol
         
         //Functions
         //Constructor 
-        Symbol(string Name_,SType* Type_=NULL,int Width_ = 0,SType* ArrType = NULL);
+        Symbol(string Name_,string Type_=NULL,int Width_ = 0,SType* ArrType = NULL);
         Symbol* Convert(string S);
         Symbol* Update(SType* Type_);
 };
