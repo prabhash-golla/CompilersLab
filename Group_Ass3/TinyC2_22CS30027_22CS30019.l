@@ -6,9 +6,10 @@
 		Golla Meghanandh Manvith Prabhash :- 22CS30027
 		Darapu Adhithya  :- 22CS30019
 	*/
+	string Globe="";
 %}
 
-
+%option yylineno
 
 /* ______________________ DEFINITIONS OF REGULAR EXPRESSIONS _______________________ */
 
@@ -103,8 +104,8 @@ WS							[ \t\v\n\f]
 "_Imaginary"				{return IMAGINARY;}
 
 {IDENTIFIER}				{return IDENTIFIER;}
-{INTEGER}	        		{return INTEGER;}
-{FLOATING_CONSTANT}	        {return FLOATING_CONSTANT;}
+{INTEGER}	        		{yylval.INTVAL=atoi(yytext);return INTEGER;}
+{FLOATING_CONSTANT}	        {yylval.FLOATVAL=atof(yytext);return FLOATING_CONSTANT;}
 {CHARACTER_CONSTANT}        {return CHARACTER_CONSTANT;}
 {STRING_LITERAL}            {return STRING_LITERAL;}
 

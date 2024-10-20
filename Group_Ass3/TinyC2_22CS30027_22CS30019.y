@@ -2,7 +2,7 @@
     #include <stdio.h>
     #include <stdlib.h>
     #include <string.h>
-
+    #include "TinyC3_22CS30027_22CS10019_translator.h"
     // #define YYDEBUG 1 //For Debugging 
     // int yydebug=1;
     
@@ -11,159 +11,69 @@
         Golla Meghanandh Manvith Prabhash :- 22CS30027
         Darapu Adhithya  :- 22CS30019
     */
-
+    extern int yylineno;
     int yylex();
+    extern string Globe;
     void yyerror(char *ERRORS);
-
-    // Node structure for the parse tree
-    typedef struct _Node {
-        char *value;
-        struct _Node *left;
-        struct _Node *right;
-    } Node;
-
-    Node* createNode(char *value, Node *left, Node *right) {
-        Node *node = (Node *)malloc(sizeof(Node));
-        node->value = strdup(value);
-        node->left = left;
-        node->right = right;
-        return node;
-    }
-    
-    void printTree(Node *node, int level) {
-        if (node == NULL) return;
-        if(strcmp(node->value,"ignore"))
-        {
-            for (int i = 0; i < level-1; i++) printf("  ");
-            if(level>0) printf("%d-->",level);
-            printf("%s\n", node->value);
-            printTree(node->left, level + 1);
-            printTree(node->right, level + 1);
-        }
-        else
-        {
-            printTree(node->left, level);
-            printTree(node->right, level);
-        }
-    }
+   
 %}
 
 %union {
     int INTVAL;
-    struct _Node *node;
+    float FLOATVAL;
+    char* CHARVAL;
+    char UnaryOper;
+    ArrayType* Array;
+    int Parameter;
+    Symbol* SymbolPointer;
+    Statement* Stateme;
+    Stype* Type;
+    Expression* Express;
 }
 
 /*_______ COMMENTS ________*/
 
-%token SINGLE_COMMENT
-%token MULTILINE_COMMENT
+%token SINGLE_COMMENT MULTILINE_COMMENT
 
 /*_______ KEYWORDS ________*/
 
-%token AUTO
-%token BREAK
-%token CASE
-%token CHAR
-%token CONST
-%token CONTINUE
-%token DEFAULT
-%token DO
-%token DOUBLE
-%token ELSE
-%token ENUM
-%token EXTERN
-%token REGISTER
-%token FLOAT
-%token FOR
-%token GOTO
-%token IF
-%token INLINE
-%token INT
-%token LONG
-%token RESTRICT
-%token RETURN
-%token SHORT
-%token SIGNED
-%token SIZEOF
-%token STATIC
-%token STRUCT
-%token SWITCH
-%token TYPEDEF
-%token UNION
-%token UNSIGNED
-%token VOID
-%token VOLATILE
-%token WHILE
-%token BOOL
-%token COMPLEX
-%token IMAGINARY
+%token AUTO BREAK CASE CHAR CONST CONTINUE DEFAULT DO DOUBLE ELSE ENUM EXTERN REGISTER FLOAT FOR GOTO IF INLINE INT LONG RESTRICT RETURN SHORT SIGNED SIZEOF STATIC STRUCT SWITCH TYPEDEF UNION UNSIGNED VOID VOLATILE WHILE BOOL COMPLEX IMAGINARY
 
 /*_______ PUNCTUATORS AND OPERATORS ________*/
 
-%token SQUARE_BRACKET_OPEN
-%token SQUARE_BRACKET_CLOSE
-%token ROUND_BRACKET_OPEN
-%token ROUND_BRACKET_CLOSE
-%token CURLY_BRACKET_OPEN
-%token CURLY_BRACKET_CLOSE
-%token DOT
-%token IMPLIES
-%token INCREMENT
-%token DECREMENT
-%token BITWISE_AND
-%token MUL
-%token PLUS
-%token MINUS
-%token BITWISE_NOT
-%token NOT
-%token DIV
-%token MOD
-%token LEFT_SHIFT
-%token RIGHT_SHIFT
-%token LESS_THAN
-%token GREATER_THAN
-%token LESS_EQUAL
-%token GREATER_EQUAL
-%token EQUAL
-%token NOT_EQUAL
-%token BITWISE_XOR
-%token BITWISE_OR
-%token AND
-%token OR
-%token QUESTION
-%token COLON
-%token SEMICOLON
-%token ELLIPSIS
-%token ASSIGN
-%token MUL_EQUAL
-%token DIV_EQUAL
-%token MOD_EQUAL
-%token PLUS_EQUAL
-%token MINUS_EQUAL
-%token SHIFT_LEFT_EQUAL
-%token SHIFT_RIGHT_EQUAL
-%token BITWISE_AND_EQUAL
-%token BITWISE_XOR_EQUAL
-%token BITWISE_OR_EQUAL
-%token COMMA
-%token HASH
+%token SQUARE_BRACKET_OPEN SQUARE_BRACKET_CLOSE ROUND_BRACKET_OPEN ROUND_BRACKET_CLOSE CURLY_BRACKET_OPEN CURLY_BRACKET_CLOSE DOT IMPLIES INCREMENT DECREMENT BITWISE_AND MUL PLUS MINUS BITWISE_NOT NOT DIV MOD LEFT_SHIFT RIGHT_SHIFT LESS_THAN GREATER_THAN LESS_EQUAL GREATER_EQUAL EQUAL NOT_EQUAL BITWISE_XOR BITWISE_OR AND OR QUESTION COLON SEMICOLON ELLIPSIS ASSIGN MUL_EQUAL DIV_EQUAL MOD_EQUAL PLUS_EQUAL MINUS_EQUAL SHIFT_LEFT_EQUAL SHIFT_RIGHT_EQUAL BITWISE_AND_EQUAL BITWISE_XOR_EQUAL BITWISE_OR_EQUAL COMMA HASH
 
 /*_______ IDENTIFIER ________*/
 
-%token IDENTIFIER
+%token<SymbolPointer> IDENTIFIER
 
 /*_______ CONSTANTS ________*/
 
-%token INTEGER
-%token FLOATING_CONSTANT
-%token CHARACTER_CONSTANT
-%token STRING_LITERAL
+%token<INTVAL> INTEGER 
+%token<FLOATVAL> FLOATING_CONSTANT 
+%token<CHARVAL> CHARACTER_CONSTANT STRING_LITERAL
 
 %nonassoc THEN
 %nonassoc ELSE
 
-%type<node> additive_expression argument_expression_list and_expression assignment_expression assignment_expression_opt block_item block_item_list block_item_list_opt cast_expression conditional_expression constant constant_expression declaration declaration_list declaration_list_opt declaration_specifiers declarator designator designator_list designation designation_opt direct_declarator exclusive_or_expression expression expression_opt external_declaration function_definition function_specifier identifier_list identifier_list_opt inclusive_or_expression initializer initializer_list init_declarator init_declarator_list iteration_statement jump_statement logical_and_expression logical_or_expression multiplicative_expression parameter_declaration parameter_list parameter_type_list pointer postfix_expression primary_expression relational_expression selection_statement specifier_qualifier_list shift_expression storage_class_specifier statement
-%type<node> unary_expression unary_operator type_name type_qualifier type_qualifier_list type_qualifier_list_opt type_specifier equality_expression labeled_statement compound_statement expression_statement translation_unit init_declarator_list_opt pointer_opt argument_expression_list_opt
+%type<Array> postfix_expression unary_expression cast_expression
+
+%type<Parameter> argument_expression_list argument_expression_list_opt
+
+%type<UnaryOper> unary_operator
+
+%type<SymbolPointer> declaration init_declarator direct_declarator initializer
+
+%type<Type> pointer
+
+%type<Stateme> statement iteration_statement jump_statement selection_statement labeled_statement compound_statement expression_statement block_item block_item_list block_item_list_opt
+
+%type<exp> additive_expression  and_expression assignment_expression assignment_expression_opt   conditional_expression constant constant_expression  declaration_list declaration_list_opt 
+declaration_specifiers declarator designator designator_list designation designation_opt  exclusive_or_expression expression expression_opt external_declaration function_definition function_specifier identifier_list identifier_list_opt inclusive_or_expression  
+initializer_list  init_declarator_list  logical_and_expression logical_or_expression multiplicative_expression parameter_declaration parameter_list parameter_type_list primary_expression relational_expression
+ specifier_qualifier_list shift_expression storage_class_specifier 
+%type<exp> type_name type_qualifier type_qualifier_list type_qualifier_list_opt type_specifier equality_expression    translation_unit init_declarator_list_opt pointer_opt
+
 %start start_symbol
 
 %%
@@ -174,79 +84,227 @@
 
 /*_______ PRIMARY EXPRESSIONS ________*/
 
-constant : INTEGER { $$ = createNode("constant",createNode("INTEGER", NULL, NULL),NULL); }
-         | FLOATING_CONSTANT { $$ = createNode("constant",createNode("FLOATING_CONSTANT", NULL, NULL),NULL); }
-         | CHARACTER_CONSTANT { $$ = createNode("constant",createNode("CHARACTER_CONSTANT", NULL, NULL),NULL); }
+constant : INTEGER 
+            { 
+                $$ = new Expression();
+                $$->LocalST = SymbolTable::GenTemp(new Stype("int"),itos($1));
+                QuadArray::Emit("=",$$->LocalST->Name,$1);
+                //$$ = createNode("constant",createNode("INTEGER", NULL, NULL),NULL); 
+            }
+         | FLOATING_CONSTANT 
+            { 
+                $$ = new Expression();
+                $$->LocalST = SymbolTable::GenTemp(new Stype("float"),ftos($1));
+                QuadArray::Emit("=",$$->LocalST->Name,$1);
+                //$$ = createNode("constant",createNode("FLOATING_CONSTANT", NULL, NULL),NULL); 
+            }
+         | CHARACTER_CONSTANT 
+            { 
+                $$ = new Expression();
+                $$->LocalST = SymbolTable::GenTemp(new Stype("char"),string($1));
+                QuadArray::Emit("=",$$->LocalST->Name,$1);
+                //$$ = createNode("constant",createNode("CHARACTER_CONSTANT", NULL, NULL),NULL); 
+            }
          ;
 
-primary_expression : IDENTIFIER { $$ = createNode("primary_expression",createNode("IDENTIFIER", NULL, NULL),NULL); }
-                   | constant   { $$ = createNode("primary_expression",$1,NULL); }
-                   | STRING_LITERAL { $$ = createNode("primary_expression",createNode("STRING_LITERAL", NULL, NULL),NULL); }
-                   | ROUND_BRACKET_OPEN expression ROUND_BRACKET_CLOSE { $$ = createNode("primary_expression", createNode("ignore",createNode("ROUND_BRACKET_OPEN",NULL,NULL),$2), createNode("ROUND_BRACKET_CLOSE",NULL,NULL)); }
+primary_expression : IDENTIFIER 
+                    { 
+                        Symbol* Temp = CurrentST->LookUp(Globe);
+                        $$ = new Expression();
+                        $$->LocalST = Temp;
+                        $$->Type = "non_bool";
+                        //$$ = createNode("primary_expression",createNode("IDENTIFIER", NULL, NULL),NULL); 
+                    }
+                   | constant   
+                    { 
+                        $$ = $1;
+                        //$$ = createNode("primary_expression",$1,NULL); 
+                    }
+                   | STRING_LITERAL 
+                    { 
+                        $$ = new Expression();
+                        $$->LocalST = SymbolTable::GenTemp(new Stype("ptr"),string($1));
+                        // QuadArray::Emit("=",$$->LocalST->Name,$1);
+                        $$->LocalST->Type->ArrType = new Stype("char");
+                        //$$ = createNode("primary_expression",createNode("STRING_LITERAL", NULL, NULL),NULL); 
+                    }
+                   | ROUND_BRACKET_OPEN expression ROUND_BRACKET_CLOSE 
+                    {   
+                        $$ = $2;
+                        //$$ = createNode("primary_expression", createNode("ignore",createNode("ROUND_BRACKET_OPEN",NULL,NULL),$2), createNode("ROUND_BRACKET_CLOSE",NULL,NULL)); 
+                    }
                    ;
 
 /*_______ POSTFIX EXPRESSIONS ________*/
 
-postfix_expression : primary_expression { $$ = createNode("postfix_expression",$1,NULL); }
-                   | postfix_expression SQUARE_BRACKET_OPEN expression SQUARE_BRACKET_CLOSE { $$ = createNode("postfix_expression",$1,createNode("ignore",createNode("SQUARE_BRACKET_OPEN",NULL,NULL),createNode("ignore",$3,createNode("SQUARE_BRACKET_CLOSE",NULL,NULL)))); }
-                   | postfix_expression ROUND_BRACKET_OPEN argument_expression_list_opt ROUND_BRACKET_CLOSE { $$ = createNode("postfix_expression", $1, createNode("ignore",createNode("ROUND_BRACKET_OPEN",NULL,NULL),createNode("ignore",$3,createNode("ROUND_BRACKET_OPEN",NULL,NULL)))); }
-                   | postfix_expression DOT IDENTIFIER { $$ = createNode("postfix_expression", $1,createNode("ignore",createNode("DOT",NULL,NULL),createNode("IDENTIFIER", NULL, NULL))); }
-                   | postfix_expression IMPLIES IDENTIFIER { $$ = createNode("postfix_expression", $1,createNode("ignore",createNode("IMPLIES",NULL,NULL),createNode("IDENTIFIER", NULL, NULL)));}
-                   | postfix_expression INCREMENT { $$ = createNode("postfix_expression", $1, createNode("INCREMENT",NULL,NULL)); }
-                   | postfix_expression DECREMENT { $$ = createNode("postfix_expression", $1, createNode("DECREMENT",NULL,NULL)); }
-                   | ROUND_BRACKET_OPEN type_name ROUND_BRACKET_CLOSE CURLY_BRACKET_OPEN initializer_list CURLY_BRACKET_CLOSE { $$ = createNode("postfix_expression", createNode("ignore",createNode("ignore",createNode("ROUND_BRACKET_OPEN",NULL,NULL),$2),createNode("ROUND_BRACKET_OPEN",NULL,NULL)),createNode("ignore",createNode("ignore",createNode("CURLY_BRACKET_CLOSE",NULL,NULL),$5),createNode("CURLY_BRACKET_CLOSE",NULL,NULL))); }
-                   | ROUND_BRACKET_OPEN type_name ROUND_BRACKET_CLOSE CURLY_BRACKET_OPEN initializer_list COMMA CURLY_BRACKET_CLOSE { $$ = createNode("postfix_expression", createNode("ignore",createNode("ignore",createNode("ROUND_BRACKET_OPEN",NULL,NULL),$2),createNode("ROUND_BRACKET_OPEN",NULL,NULL)),createNode("ignore",createNode("ignore",createNode("CURLY_BRACKET_CLOSE",NULL,NULL),$5),createNode("ignore",createNode("COMMA",NULL,NULL),createNode("CURLY_BRACKET_CLOSE",NULL,NULL)))); }
+postfix_expression : primary_expression 
+                    { 
+                        //$$ = createNode("postfix_expression",$1,NULL); 
+                    }
+                   | postfix_expression SQUARE_BRACKET_OPEN expression SQUARE_BRACKET_CLOSE 
+                    {
+                        // $$ = createNode("postfix_expression",$1,createNode("ignore",createNode("SQUARE_BRACKET_OPEN",NULL,NULL),createNode("ignore",$3,createNode("SQUARE_BRACKET_CLOSE",NULL,NULL)))); 
+                    }
+                   | postfix_expression ROUND_BRACKET_OPEN argument_expression_list_opt ROUND_BRACKET_CLOSE 
+                    { 
+                        //$$ = createNode("postfix_expression", $1, createNode("ignore",createNode("ROUND_BRACKET_OPEN",NULL,NULL),createNode("ignore",$3,createNode("ROUND_BRACKET_OPEN",NULL,NULL)))); 
+                    }
+                   | postfix_expression DOT IDENTIFIER 
+                    { 
+                        //$$ = createNode("postfix_expression", $1,createNode("ignore",createNode("DOT",NULL,NULL),createNode("IDENTIFIER", NULL, NULL))); 
+                    }
+                   | postfix_expression IMPLIES IDENTIFIER 
+                    { 
+                        //$$ = createNode("postfix_expression", $1,createNode("ignore",createNode("IMPLIES",NULL,NULL),createNode("IDENTIFIER", NULL, NULL)));
+                    }
+                   | postfix_expression INCREMENT 
+                    {
+                        // $$ = createNode("postfix_expression", $1, createNode("INCREMENT",NULL,NULL)); 
+                    }
+                   | postfix_expression DECREMENT 
+                    { 
+                        //$$ = createNode("postfix_expression", $1, createNode("DECREMENT",NULL,NULL)); 
+                    }
+                   | ROUND_BRACKET_OPEN type_name ROUND_BRACKET_CLOSE CURLY_BRACKET_OPEN initializer_list CURLY_BRACKET_CLOSE 
+                    {
+                        // $$ = createNode("postfix_expression", createNode("ignore",createNode("ignore",createNode("ROUND_BRACKET_OPEN",NULL,NULL),$2),createNode("ROUND_BRACKET_OPEN",NULL,NULL)),createNode("ignore",createNode("ignore",createNode("CURLY_BRACKET_CLOSE",NULL,NULL),$5),createNode("CURLY_BRACKET_CLOSE",NULL,NULL))); 
+                    }
+                   | ROUND_BRACKET_OPEN type_name ROUND_BRACKET_CLOSE CURLY_BRACKET_OPEN initializer_list COMMA CURLY_BRACKET_CLOSE 
+                    {
+                        // $$ = createNode("postfix_expression", createNode("ignore",createNode("ignore",createNode("ROUND_BRACKET_OPEN",NULL,NULL),$2),createNode("ROUND_BRACKET_OPEN",NULL,NULL)),createNode("ignore",createNode("ignore",createNode("CURLY_BRACKET_CLOSE",NULL,NULL),$5),createNode("ignore",createNode("COMMA",NULL,NULL),createNode("CURLY_BRACKET_CLOSE",NULL,NULL)))); 
+                    }
                    ;
 
 /*_______ ARGUMENT EXPRESSION LIST ________*/
 
-argument_expression_list_opt: {$$ = createNode("argument_expression_list_opt",NULL, NULL);}
-                        | argument_expression_list {$$ = createNode("argument_expression_list_opt", $1, NULL);}
+argument_expression_list_opt: 
+                        {
+                            $$ = 0;
+                            //$$ = createNode("argument_expression_list_opt",NULL, NULL);
+                        }
+                        | argument_expression_list 
+                        {
+                            $$ = $1;
+                            //$$ = createNode("argument_expression_list_opt", $1, NULL);
+                        }
                         ;
 
-argument_expression_list : assignment_expression { $$ = createNode("argument_expression_list", $1, NULL); }
-                        | argument_expression_list COMMA assignment_expression { $$ = createNode("argument_expression_list", $1, createNode("ignore",createNode("COMMA",NULL,NULL),$3)); }
+argument_expression_list : assignment_expression 
+                        { 
+                            $$ = 1;
+                            QuadArray::Emit("param",$1->LocalST->Name);
+                            //$$ = createNode("argument_expression_list", $1, NULL); 
+                        }
+                        | argument_expression_list COMMA assignment_expression 
+                        { 
+                            $$ = $1 + 1;
+                            QuadArray::Emit("param",$3->LocalST->Name);
+                            //$$ = createNode("argument_expression_list", $1, createNode("ignore",createNode("COMMA",NULL,NULL),$3)); 
+                        }
                         ;
 
 /*_______ URNARY EXPRESSION ________*/
 
-unary_expression : postfix_expression { $$ = createNode("unary_expression", $1, NULL); }
-                 | INCREMENT unary_expression { $$ = createNode("unary_expression", createNode("INCREMENT",NULL,NULL), $2); }
-                 | DECREMENT unary_expression { $$ = createNode("unary_expression", createNode("DECREMENT",NULL,NULL), $2); }
-                 | unary_operator cast_expression { $$ = createNode("unary_expression", $1, $2); }
-                 | SIZEOF unary_expression { $$ = createNode("unary_expression", createNode("SIZEOF",NULL,NULL), $2); }
-                 | SIZEOF ROUND_BRACKET_OPEN type_name ROUND_BRACKET_CLOSE {  $$ = createNode("unary_expression", createNode("SIZEOF",NULL,NULL), createNode("ignore",createNode("ignore",createNode("ROUND_BRACKET_OPEN",NULL,NULL),$3),createNode("ROUND_BRACKET_CLOSE",NULL,NULL))); }
+unary_expression : postfix_expression 
+                    {
+                        // $$ = createNode("unary_expression", $1, NULL); 
+                    }
+                 | INCREMENT unary_expression 
+                    { 
+                        //$$ = createNode("unary_expression", createNode("INCREMENT",NULL,NULL), $2); 
+                    }
+                 | DECREMENT unary_expression 
+                    { 
+                        //$$ = createNode("unary_expression", createNode("DECREMENT",NULL,NULL), $2); 
+                    }
+                 | unary_operator cast_expression 
+                    { 
+                        //$$ = createNode("unary_expression", $1, $2); 
+                    }
+                 | SIZEOF unary_expression 
+                    { 
+                        //$$ = createNode("unary_expression", createNode("SIZEOF",NULL,NULL), $2); 
+                    }
+                 | SIZEOF ROUND_BRACKET_OPEN type_name ROUND_BRACKET_CLOSE 
+                    {  
+                        //$$ = createNode("unary_expression", createNode("SIZEOF",NULL,NULL), createNode("ignore",createNode("ignore",createNode("ROUND_BRACKET_OPEN",NULL,NULL),$3),createNode("ROUND_BRACKET_CLOSE",NULL,NULL))); 
+                    }
                  ;
 
 /*_______ URNARY OPERATOR ________*/
 
-unary_operator: BITWISE_AND { $$ = createNode("BITWISE_AND", NULL, NULL); }
-              | MUL { $$ = createNode("MUL", NULL, NULL); }
-              | PLUS { $$ = createNode("PLUS", NULL, NULL); }
-              | MINUS { $$ = createNode("MINUS", NULL, NULL); }
-              | BITWISE_NOT { $$ = createNode("BITWISE_NOT", NULL, NULL); }
-              | NOT { $$ = createNode("NOT", NULL, NULL); }
+unary_operator: BITWISE_AND 
+                {
+                    // $$ = createNode("BITWISE_AND", NULL, NULL); 
+                }
+              | MUL 
+                { 
+                    //$$ = createNode("MUL", NULL, NULL); 
+                }
+              | PLUS 
+                { 
+                    //$$ = createNode("PLUS", NULL, NULL); 
+                }
+              | MINUS 
+                { 
+                    //$$ = createNode("MINUS", NULL, NULL); 
+                }
+              | BITWISE_NOT 
+                { 
+                    //$$ = createNode("BITWISE_NOT", NULL, NULL); 
+                }
+              | NOT 
+                {
+                    // $$ = createNode("NOT", NULL, NULL); 
+                }
               ;
 
 /*_______ CAST EXPRESSION ________*/
 
-cast_expression : unary_expression { $$ =  createNode("cast_expression", $1, NULL); }
-                | ROUND_BRACKET_OPEN type_name ROUND_BRACKET_CLOSE cast_expression { $$ =  createNode("cast_expression", createNode("ROUND_BRACKET_OPEN",NULL,NULL), createNode("ignore",$2,createNode("ignore",createNode("ROUND_BRACKET_CLOSE",NULL,NULL),$4))); }
+cast_expression : unary_expression 
+                { 
+                    //$$ =  createNode("cast_expression", $1, NULL); 
+                }
+                | ROUND_BRACKET_OPEN type_name ROUND_BRACKET_CLOSE cast_expression 
+                { 
+                    //$$ =  createNode("cast_expression", createNode("ROUND_BRACKET_OPEN",NULL,NULL), createNode("ignore",$2,createNode("ignore",createNode("ROUND_BRACKET_CLOSE",NULL,NULL),$4))); 
+                }
                 ;
 
 /*_______ MULTIPLICATIVE EXPRESSION ________*/
 
-multiplicative_expression : cast_expression { $$ =createNode("multiplicative_expression",$1,NULL);  }
-                         | multiplicative_expression MUL cast_expression { $$ = createNode("multiplicative_expression",$1,createNode("ignore",createNode("MUL", NULL, NULL),$3)); }
-                         | multiplicative_expression DIV cast_expression { $$ = createNode("multiplicative_expression",$1,createNode("ignore",createNode("DIV", NULL, NULL),$3)); }
-                         | multiplicative_expression MOD cast_expression { $$ = createNode("multiplicative_expression",$1,createNode("ignore",createNode("MOD", NULL, NULL),$3)); }
+multiplicative_expression : cast_expression 
+                            { 
+                                //$$ =createNode("multiplicative_expression",$1,NULL);  
+                            }
+                         | multiplicative_expression MUL cast_expression 
+                            { 
+                                //$$ = createNode("multiplicative_expression",$1,createNode("ignore",createNode("MUL", NULL, NULL),$3)); 
+                            }
+                         | multiplicative_expression DIV cast_expression 
+                            { 
+                                //$$ = createNode("multiplicative_expression",$1,createNode("ignore",createNode("DIV", NULL, NULL),$3)); 
+                            }
+                         | multiplicative_expression MOD cast_expression 
+                            { 
+                                //$$ = createNode("multiplicative_expression",$1,createNode("ignore",createNode("MOD", NULL, NULL),$3)); 
+                            }
                          ;
 
 /*_______ ADDITIVE EXPRESSION ________*/
 
-additive_expression : multiplicative_expression { $$ =createNode("additive_expression",$1,NULL); }
-                   | additive_expression PLUS multiplicative_expression {$$ = createNode("additive_expression",$1,createNode("ignore",createNode("PLUS", NULL, NULL),$3)); }
-                   | additive_expression MINUS multiplicative_expression { $$ = createNode("additive_expression",$1,createNode("ignore",createNode("MINUS", NULL, NULL),$3)); }
+additive_expression : multiplicative_expression 
+                    { 
+                        //$$ =createNode("additive_expression",$1,NULL); 
+                    }
+                   | additive_expression PLUS multiplicative_expression 
+                    {
+                        //$$ = createNode("additive_expression",$1,createNode("ignore",createNode("PLUS", NULL, NULL),$3)); 
+                    }
+                   | additive_expression MINUS multiplicative_expression 
+                    { 
+                        //$$ = createNode("additive_expression",$1,createNode("ignore",createNode("MINUS", NULL, NULL),$3)); 
+                    }
                    ;
 
 /*_______ SHIFT EXPRESSION ________*/
