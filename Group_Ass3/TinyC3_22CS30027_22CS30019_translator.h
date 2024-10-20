@@ -147,5 +147,6 @@ bool TypeCheck(SType* E1,SType* E2);
 int SizeOfS(SType* S);
 string itos(int i);
 string ftos(float f);
+string checkType(SType* S);
 
 #endif

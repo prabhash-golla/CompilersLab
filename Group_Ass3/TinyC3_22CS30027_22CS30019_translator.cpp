@@ -327,6 +327,28 @@ string ftos(float f)
     return s.str();
 }
 
+string checkType(SType* S)
+{
+     if(S==NULL)
+    {
+        return "null";
+    }
+    if(S->Type == "void" || S->Type == "char" || S->Type == "int" || S->Type == "float" || S->Type == "block" || S->Type == "func")
+    {
+        return S->Type;
+    }
+    else if(S->Type == "ptr")
+    {
+        return S->Type + "(" + checkType(S->ArrType) + ")";
+    }
+    else if(S->Type == "arr")
+    {
+        return S->Type + "(" + checkType(S->ArrType) + "," + itos(S->Width) + ")";
+    }
+    else
+    return "unknown";
+}
+
 int main()
 {
     SymbolTableCount = 0;
