@@ -1,69 +1,36 @@
-/*
-    Group :- TinyC-67
-    Golla Meghanandh Manvith Prabhash :- 22CS30027
-    Darapu Adhithya  :- 22CS30019
-*/
-extern int value;
-static const double scp = 1.414;
-auto b = 34;
-volatile long y = 6540;
-_Bool x = 1;
-inline char toUpper(char ch)
-{
-    if(ch >= 97 && ch <= 122)
-        ch -= 32;
-    return ch;
+// Declarations (variables, pointers, 1D array, 2D array, functions) and arithmetic operations
+
+// Global declarations
+float d = 2.3;
+char c;	
+int e, f, g, h, i, j, k;
+float l, m, n, o, p;
+int w[10];                      
+float f[20][50];                
+int a = 4, *p, b;               
+
+int func (int i, float d) {
+    d = 2.3;
+    d = (float)i;
+    d = d/2.3;
+    d = d*2.3;
+    d = d+w[2];
+    return i;
 }
 
-int main()
-{
-    short signed int ssi = 5434;    
-   
-    char _1 = 48;
-    char stp[2] = "";
-    char str[] = "Test a string\\\"\'\n";
-
-    int first = 20, second = 809;
-    first++;
-    first--;
-    first = !second;
-    first = ~second;
-    first = first/second;
-    first = first%second;
-    first = first<<second;
-    first = first>>second;
-    first <<= second;
-    first >>= second;
-    first = first^second;
-    first = first|second;
-    first = (first) ? first : second;
-    first ^= second;
-    first |= second, second = 0;
-    first = first&second;
-    first = first*second;
-    first = first+second;
-    first = first-second;
-    first *= second;
-    first /= second;
-    first %= second;
-    first += second;
-    first -= second;
-    first &= second;
-
-    int n = 10;
-    do {
-        n -= 1;
-    } while (n > 1);
-
-    for(int i = 0; (i < 3 && i >= 0) || (i > 100 && i != 101); i++) {
-        if(i%5!=0) continue;
-        else break;
-    }
-
-    float Pra = 23.E-2;
-    float Pro = 23.56e+3;
-    float Prb = .56E2;
-    float Prc = 232e3;
-
+int main () {
+    int p = 120;
+    int q = 17;
+    char ch = 'c', d = 'a'; 
+    i = p + q;
+    j = p - q;
+    k = p * q;
+    l = p / q;
+    m = p % q;
+    n = p & q;
+    o = p | q;
+    q = i << 2;
+    p = i >> 1;
+    func(i, i);
     return 0;
 }

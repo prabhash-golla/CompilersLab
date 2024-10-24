@@ -15,6 +15,7 @@ using namespace std;
 
 const char nl = '\n';
 
+//Global Variables
 QuadArray QuadList;
 Symbol* RecentSymbol;
 SymbolTable* CurrentST;
@@ -228,18 +229,21 @@ void QuadArray::Print()
 
 void QuadArray::Emit(string Op_,string Result_,string Arg1_,string Arg2_)
 {
+    // cout << Arg1_ << endl;
     Quad* Q = new Quad(Result_,Arg1_,Op_,Arg2_);
     QuadList.InstructionList.push_back(*Q);
 }
 
 void QuadArray::Emit(string Op_,string Result_,int Arg1_,string Arg2_)
 {
+    // cout << Arg1_ << endl;
     Quad* Q = new Quad(Result_,Arg1_,Op_,Arg2_);
     QuadList.InstructionList.push_back(*Q);
 }
 
 void QuadArray::Emit(string Op_,string Result_,float Arg1_,string Arg2_)
 {
+    // cout << Arg1_ << endl;
     Quad* Q = new Quad(Result_,Arg1_,Op_,Arg2_);
     QuadList.InstructionList.push_back(*Q);
 }
@@ -319,7 +323,7 @@ string itos(int i)
     s << i;
     return s.str();
 }
-emit
+
 string ftos(float f)
 {
     stringstream s;
@@ -353,12 +357,12 @@ Expression* btoi(Expression* E)
 {
     if(E->Type=="bool")
     {
-        E->LocalST = SymbolTable::GenTemp(new SType("int"));
+        E->Location = SymbolTable::GenTemp(new SType("int"));
         BackPath(E->TrueList,QuadList.InstructionList.size());
-        QuadArray::Emit("=",E->LocalST->Name,"true");
+        QuadArray::Emit("=",E->Location->Name,"true");
         QuadArray::Emit("goto",itos(QuadList.InstructionList.size()));
         BackPath(E->FalseList,QuadList.InstructionList.size());
-        QuadArray::Emit("=",E->LocalST->Name,"false");
+        QuadArray::Emit("=",E->Location->Name,"false");
     }
     return E;
 }
@@ -368,7 +372,7 @@ Expression* itob(Expression* E)
     if(E->Type!="bool")
     {
         E->FalseList  = MakeList(QuadList.InstructionList.size());
-        QuadArray::Emit("==",E->LocalST->Name,"0");
+        QuadArray::Emit("==",E->Location->Name,"0");
         E->TrueList  = MakeList(QuadList.InstructionList.size());
         QuadArray::Emit("goto","");
     }
@@ -377,14 +381,23 @@ Expression* itob(Expression* E)
 
 int main()
 {
-    SymbolTableCount = 0;
-    GlobalST = new SymbolTable("Global");
-    CurrentST = GlobalST;
 
-    BlockType = "";
-    VarType = "";
     
-    yyparse();
+
+    try {
+        // Memory allocation code
+        SymbolTableCount = 0;
+        GlobalST = new SymbolTable("Global");
+        CurrentST = GlobalST;
+
+        BlockType = "";
+        VarType = ""; 
+        yyparse();
+    } catch (const std::bad_alloc& e) {
+        std::cerr << "Memory allocation failed: " << e.what() << std::endl;
+        return 0;
+    }
+
 
     GlobalST->Update();
     GlobalST->Print();

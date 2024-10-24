@@ -26,12 +26,20 @@ class Expression;
 class Statement;
 class ArrayType;
 
+//Global Variables
+extern Symbol* RecentSymbol;
+extern SymbolTable* CurrentST;
+extern SymbolTable* GlobalST;
+extern int SymbolTableCount;
+extern string BlockType;
+extern string VarType;
+
 
 // Expression Class
 class Expression
 {
     public:
-        Symbol* LocalST;
+        Symbol* Location;
         string Type;
         list<int> TrueList,FalseList;
         list<int> NextList;
@@ -150,5 +158,7 @@ string ftos(float f);
 string checkType(SType* S);
 Expression* itob(Expression* E);
 Expression* btoi(Expression* E);
+
+Symbol* TypeConvertor(Symbol* Old,string New);
 
 #endif
