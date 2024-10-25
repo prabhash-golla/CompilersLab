@@ -33,7 +33,7 @@ extern SymbolTable* GlobalST;
 extern int SymbolTableCount;
 extern string BlockType;
 extern string VarType;
-
+extern QuadArray QuadList;
 
 // Expression Class
 class Expression

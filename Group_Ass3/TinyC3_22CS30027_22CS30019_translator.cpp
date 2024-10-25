@@ -360,7 +360,7 @@ Expression* btoi(Expression* E)
         E->Location = SymbolTable::GenTemp(new SType("int"));
         BackPath(E->TrueList,QuadList.InstructionList.size());
         QuadArray::Emit("=",E->Location->Name,"true");
-        QuadArray::Emit("goto",itos(QuadList.InstructionList.size()));
+        QuadArray::Emit("goto",itos(QuadList.InstructionList.size()+1));
         BackPath(E->FalseList,QuadList.InstructionList.size());
         QuadArray::Emit("=",E->Location->Name,"false");
     }

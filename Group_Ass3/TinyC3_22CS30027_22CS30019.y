@@ -303,33 +303,33 @@ unary_expression : postfix_expression
 
 unary_operator: BITWISE_AND 
                 {
-                    $$ = "&";
+                    $$ = '&';
                     // $$ = createNode("BITWISE_AND", NULL, NULL); 
                 }
               | MUL 
                 { 
-                    $$ = "*";
+                    $$ = '*';
                     //$$ = createNode("MUL", NULL, NULL); 
                 }
               | PLUS 
                 { 
-                    $$ = "+";
-                    //$$ = createNode("PLUS", NULL, NULL); 
+                    $$ = '+';
+                    //$$ = createNode('PLUS', NULL, NULL); 
                 }
               | MINUS 
                 { 
-                    $$ = "-";
-                    //$$ = createNode("MINUS", NULL, NULL); 
+                    $$ = '-';
+                    //$$ = createNode('MINUS', NULL, NULL); 
                 }
               | BITWISE_NOT 
                 { 
-                    $$ = "~";
-                    //$$ = createNode("BITWISE_NOT", NULL, NULL); 
+                    $$ = '~';
+                    //$$ = createNode('BITWISE_NOT', NULL, NULL); 
                 }
               | NOT 
                 {
-                    $$ = "!";
-                    // $$ = createNode("NOT", NULL, NULL); 
+                    $$ = '!';
+                    // $$ = createNode('NOT', NULL, NULL); 
                 }
               ;
 
@@ -343,7 +343,8 @@ cast_expression : unary_expression
                 | ROUND_BRACKET_OPEN type_name ROUND_BRACKET_CLOSE cast_expression 
                 { 
                     $$ = new ArrayType();
-                    $$->Array = convert
+                    $$->Array = $4->Array;
+                    // $$->Array = TypeConvertor($4->Array,varType)
                     //$$ =  createNode("cast_expression", createNode("ROUND_BRACKET_OPEN",NULL,NULL), createNode("ignore",$2,createNode("ignore",createNode("ROUND_BRACKET_CLOSE",NULL,NULL),$4))); 
                 }
                 ;
@@ -352,18 +353,62 @@ cast_expression : unary_expression
 
 multiplicative_expression : cast_expression 
                             { 
+                                $$ = new Expression();
+                                if($1->A_Type=="arr")
+                                {
+                                    $$->Location = SymbolTable::GenTemp($1->Location->Type);
+                                    QuadArray::Emit("=[]",$$->Location->Name,$1->Array->Name,$1->Location->Name);
+                                }
+                                else if($1->A_Type=="ptr")
+                                {
+                                    $$->Location = $1->Location;
+                                }
+                                else
+                                {
+                                    $$->Location = $1->Array;
+                                }
                                 //$$ =createNode("multiplicative_expression",$1,NULL);  
                             }
                          | multiplicative_expression MUL cast_expression 
                             { 
+                                if(TypeCheck($1->Location,$3->Array))
+                                {
+                                    $$ = new Expression();
+                                    $$->Location = SymbolTable::GenTemp(new SType($1->Location->Type->Type));
+                                    QuadArray::Emit("*",$$->Location->Name,$1->Location->Name,$3->Array->Name);
+                                }
+                                else
+                                {
+                                    yyerror("Type Mismatch");
+                                }
                                 //$$ = createNode("multiplicative_expression",$1,createNode("ignore",createNode("MUL", NULL, NULL),$3)); 
                             }
                          | multiplicative_expression DIV cast_expression 
                             { 
+                                if(TypeCheck($1->Location,$3->Array))
+                                {
+                                    $$ = new Expression();
+                                    $$->Location = SymbolTable::GenTemp(new SType($1->Location->Type->Type));
+                                    QuadArray::Emit("/",$$->Location->Name,$1->Location->Name,$3->Array->Name);
+                                }
+                                else
+                                {
+                                    yyerror("Type Mismatch");
+                                }
                                 //$$ = createNode("multiplicative_expression",$1,createNode("ignore",createNode("DIV", NULL, NULL),$3)); 
                             }
                          | multiplicative_expression MOD cast_expression 
                             { 
+                                if(TypeCheck($1->Location,$3->Array))
+                                {
+                                    $$ = new Expression();
+                                    $$->Location = SymbolTable::GenTemp(new SType($1->Location->Type->Type));
+                                    QuadArray::Emit("%",$$->Location->Name,$1->Location->Name,$3->Array->Name);
+                                }
+                                else
+                                {
+                                    yyerror("Type Mismatch");
+                                }
                                 //$$ = createNode("multiplicative_expression",$1,createNode("ignore",createNode("MOD", NULL, NULL),$3)); 
                             }
                          ;
@@ -372,14 +417,35 @@ multiplicative_expression : cast_expression
 
 additive_expression : multiplicative_expression 
                     { 
+                        $$ = $1;
                         //$$ =createNode("additive_expression",$1,NULL); 
                     }
                    | additive_expression PLUS multiplicative_expression 
                     {
+                        if(TypeCheck($1->Location,$3->Location))
+                        {
+                            $$ = new Expression();
+                            $$->Location = SymbolTable::GenTemp(new SType($1->Location->Type->Type));
+                            QuadArray::Emit("+",$$->Location->Name,$1->Location->Name,$3->Location->Name);
+                        }
+                        else
+                        {
+                            yyerror("Type Mismatch");
+                        }
                         //$$ = createNode("additive_expression",$1,createNode("ignore",createNode("PLUS", NULL, NULL),$3)); 
                     }
                    | additive_expression MINUS multiplicative_expression 
                     { 
+                        if(TypeCheck($1->Location,$3->Location))
+                        {
+                            $$ = new Expression();
+                            $$->Location = SymbolTable::GenTemp(new SType($1->Location->Type->Type));
+                            QuadArray::Emit("-",$$->Location->Name,$1->Location->Name,$3->Location->Name);
+                        }
+                        else
+                        {
+                            yyerror("Type Mismatch");
+                        }
                         //$$ = createNode("additive_expression",$1,createNode("ignore",createNode("MINUS", NULL, NULL),$3)); 
                     }
                    ;
@@ -388,14 +454,35 @@ additive_expression : multiplicative_expression
 
 shift_expression : additive_expression
                  { 
+                    $$ = $1;
                     //$$ =createNode("shift_expression",$1,NULL); 
                 }
                  | shift_expression LEFT_SHIFT additive_expression 
                  { 
+                    if($3->Location->Type->Type=="int")
+                    {
+                        $$ = new Expression();
+                        $$->Location = SymbolTable::GenTemp(new SType("int"));
+                        QuadArray::Emit("<<",$$->Location->Name,$1->Location->Name,$3->Location->Name);
+                    }
+                    else
+                    {
+                        yyerror("Type Error");
+                    }
                     //$$ = createNode("shift_expression",$1,createNode("ignore",createNode("LEFT_SHIFT", NULL, NULL),$3)); 
                 }
                  | shift_expression RIGHT_SHIFT additive_expression 
                  {
+                    if($3->Location->Type->Type=="int")
+                    {
+                        $$ = new Expression();
+                        $$->Location = SymbolTable::GenTemp(new SType("int"));
+                        QuadArray::Emit(">>",$$->Location->Name,$1->Location->Name,$3->Location->Name);
+                    }
+                    else
+                    {
+                        yyerror("Type Error");
+                    }
                     // $$ = createNode("shift_expression",$1,createNode("ignore",createNode("RIGHT_SHIFT", NULL, NULL),$3)); 
                 }
                  ;
@@ -404,22 +491,75 @@ shift_expression : additive_expression
 
 relational_expression : shift_expression 
                     {
+                        $$=$1;
                         // $$ =createNode("relational_expression",$1,NULL); 
                     }
                      | relational_expression LESS_THAN shift_expression 
                     {
+                        if(TypeCheck($1->Location,$3->Location))
+                        {
+                            $$ = new Expression();
+                            $$->Type=="bool";
+                            $$->TrueList= MakeList(QuadList.InstructionList.size());
+                            $$->FalseList= MakeList(QuadList.InstructionList.size()+1);
+                            QuadArray::Emit("<","",$1->Location->Name,$3->Location->Name);
+                            QuadArray::Emit("goto","_");
+                        }
+                        else
+                        {
+                            yyerror("Type mismatch");
+                        }
                         //$$ = createNode("relational_expression",$1,createNode("ignore",createNode("LESS_THAN", NULL, NULL),$3)); 
                     }
                      | relational_expression GREATER_THAN shift_expression 
                      { 
+                        if(TypeCheck($1->Location,$3->Location))
+                        {
+                            $$ = new Expression();
+                            $$->Type=="bool";
+                            $$->TrueList= MakeList(QuadList.InstructionList.size());
+                            $$->FalseList= MakeList(QuadList.InstructionList.size()+1);
+                            QuadArray::Emit(">","",$1->Location->Name,$3->Location->Name);
+                            QuadArray::Emit("goto","_");
+                        }
+                        else
+                        {
+                            yyerror("Type mismatch");
+                        }
                         //$$ = createNode("relational_expression",$1,createNode("ignore",createNode("GREATER_THAN", NULL, NULL),$3)); 
                     }
                      | relational_expression LESS_EQUAL shift_expression 
                      { 
+                        if(TypeCheck($1->Location,$3->Location))
+                        {
+                            $$ = new Expression();
+                            $$->Type=="bool";
+                            $$->TrueList= MakeList(QuadList.InstructionList.size());
+                            $$->FalseList= MakeList(QuadList.InstructionList.size()+1);
+                            QuadArray::Emit("<=","",$1->Location->Name,$3->Location->Name);
+                            QuadArray::Emit("goto","_");
+                        }
+                        else
+                        {
+                            yyerror("Type mismatch");
+                        }
                         //$$ = createNode("relational_expression",$1,createNode("ignore",createNode("LESS_EQUAL", NULL, NULL),$3)); 
                     }
                      | relational_expression GREATER_EQUAL shift_expression 
                      { 
+                        if(TypeCheck($1->Location,$3->Location))
+                        {
+                            $$ = new Expression();
+                            $$->Type=="bool";
+                            $$->TrueList= MakeList(QuadList.InstructionList.size());
+                            $$->FalseList= MakeList(QuadList.InstructionList.size()+1);
+                            QuadArray::Emit(">=","",$1->Location->Name,$3->Location->Name);
+                            QuadArray::Emit("goto","_");
+                        }
+                        else
+                        {
+                            yyerror("Type mismatch");
+                        }
                         //$$ = createNode("relational_expression",$1,createNode("ignore",createNode("GREATER_EQUAL", NULL, NULL),$3)); 
                     }
                      ;
@@ -428,14 +568,45 @@ relational_expression : shift_expression
 
 equality_expression : relational_expression 
                     { 
+                        $$ = $1;
                         //$$ = createNode("equality_expression",$1,NULL); 
                     }
                    | equality_expression EQUAL relational_expression 
                    { 
+                        if(TypeCheck($1->Location,$3->Location))
+                        {
+                            $$ = new Expression();
+                            btoi($1);
+                            btoi($3);
+                            $$->Type=="bool";
+                            $$->TrueList= MakeList(QuadList.InstructionList.size());
+                            $$->FalseList= MakeList(QuadList.InstructionList.size()+1);
+                            QuadArray::Emit("==","",$1->Location->Name,$3->Location->Name);
+                            QuadArray::Emit("goto","_");
+                        }
+                        else
+                        {
+                            yyerror("Type mismatch");
+                        }
                        //$$ = createNode("equality_expression",$1,createNode("ignore",createNode("EQUAL", NULL, NULL),$3)); 
                     }
                    | equality_expression NOT_EQUAL relational_expression 
                    {
+                        if(TypeCheck($1->Location,$3->Location))
+                        {
+                            $$ = new Expression();
+                            btoi($1);
+                            btoi($3);
+                            $$->Type=="bool";
+                            $$->TrueList= MakeList(QuadList.InstructionList.size());
+                            $$->FalseList= MakeList(QuadList.InstructionList.size()+1);
+                            QuadArray::Emit("!=","",$1->Location->Name,$3->Location->Name);
+                            QuadArray::Emit("goto","_");
+                        }
+                        else
+                        {
+                            yyerror("Type mismatch");
+                        }
                      //$$ = createNode("equality_expression",$1,createNode("ignore",createNode("NOT_EQUAL", NULL, NULL),$3));
                      }
                    ;
@@ -444,10 +615,24 @@ equality_expression : relational_expression
 
 and_expression : equality_expression 
                 { 
+                    $$ = $1;
                     //$$ = createNode("and_expression",$1,NULL); 
                 }
                | and_expression BITWISE_AND equality_expression
                 { 
+                    if(TypeCheck($1->Location,$3->Location))
+                    {
+                        $$ = new Expression();
+                        btoi($1);
+                        btoi($3);
+                        $$->Type=="notbool";
+                        $$->Location = SymbolTable::GenTemp(new SType("int"));
+                        QuadArray::Emit("&",$$->Location->Name,$1->Location->Name,$3->Location->Name);
+                    }
+                    else
+                    {
+                        yyerror("Type mismatch");
+                    }
                     //$$ = createNode("and_expression",$1,createNode("ignore",createNode("BITWISE_AND", NULL, NULL),$3)); 
                 }
                ;
@@ -456,10 +641,24 @@ and_expression : equality_expression
 
 exclusive_or_expression : and_expression 
                         { 
+                            $$ = $1;
                             //$$ = createNode("exclusive_or_expression",$1,NULL); 
                         }
                         | exclusive_or_expression BITWISE_XOR and_expression 
                         {
+                            if(TypeCheck($1->Location,$3->Location))
+                            {
+                                $$ = new Expression();
+                                btoi($1);
+                                btoi($3);
+                                $$->Type=="notbool";
+                                $$->Location = SymbolTable::GenTemp(new SType("int"));
+                                QuadArray::Emit("^",$$->Location->Name,$1->Location->Name,$3->Location->Name);
+                            }
+                            else
+                            {
+                                yyerror("Type mismatch");
+                            }
                             //$$ = createNode("exclusive_or_expression",$1,createNode("ignore",createNode("BITWISE_XOR", NULL, NULL),$3)); 
                         }
                         ;
@@ -468,10 +667,24 @@ exclusive_or_expression : and_expression
 
 inclusive_or_expression : exclusive_or_expression 
                         { 
+                            $$ = $1;
                             //$$ = createNode("inclusive_or_expression",$1,NULL); 
                         }
                         | inclusive_or_expression BITWISE_OR exclusive_or_expression 
                         { 
+                            if(TypeCheck($1->Location,$3->Location))
+                            {
+                                $$ = new Expression();
+                                btoi($1);
+                                btoi($3);
+                                $$->Type=="notbool";
+                                $$->Location = SymbolTable::GenTemp(new SType("int"));
+                                QuadArray::Emit("|",$$->Location->Name,$1->Location->Name,$3->Location->Name);
+                            }
+                            else
+                            {
+                                yyerror("Type mismatch");
+                            }
                             //$$ = createNode("inclusive_or_expression",$1,createNode("ignore",createNode("BITWISE_OR", NULL, NULL),$3)); 
                         }
                         ;
@@ -480,10 +693,12 @@ inclusive_or_expression : exclusive_or_expression
 
 logical_and_expression : inclusive_or_expression 
                         { 
+                            $$ = $1;
                             //$$ = createNode("logical_and_expression",$1,NULL); 
                         }
                        | logical_and_expression AND inclusive_or_expression 
                         { 
+                            $$ = $1;
                             //$$ = createNode("logical_and_expression",$1,createNode("ignore",createNode("AND", NULL, NULL),$3)); 
                         }
                        ;
@@ -492,10 +707,12 @@ logical_and_expression : inclusive_or_expression
 
 logical_or_expression : logical_and_expression 
                         { 
+                            $$ = $1
                             //$$ = createNode("logical_or_expression",$1,NULL); 
                         }
                       | logical_or_expression OR logical_and_expression 
                         {
+                            $$ = $1;
                             // $$ = createNode("logical_or_expression",$1,createNode("ignore",createNode("OR", NULL, NULL),$3));  
                         }
                       ;
@@ -504,10 +721,12 @@ logical_or_expression : logical_and_expression
 
 conditional_expression : logical_or_expression 
                         {
+                            $$ = $1;
                             // $$ = createNode("conditional_expression",$1,NULL); 
                         }
                       | logical_or_expression QUESTION expression COLON conditional_expression 
                         { 
+                            $$ = $1;
                             //$$ = createNode("conditional_expression",$1,createNode("ignore",createNode("QUESTION", NULL, NULL),createNode("ignore",$3,createNode("ignore",createNode("COLON", NULL, NULL),$5))));
                         }
                       ;
@@ -516,53 +735,219 @@ conditional_expression : logical_or_expression
 
 assignment_expression : conditional_expression 
                     {
+                        $$ = $1;
                         // $$ = createNode("assignment_expression",$1,NULL); 
                     }
                      | unary_expression ASSIGN assignment_expression 
-                    {  
+                    { 
+                        if($1->A_Type=="arr")
+                        {
+                            $3->Location = TypeConvertor($3->Location,$1->Type->Type);
+                            QuadArray::Emit("[]=",$1->Array->Name,$1->Location->Name,$3->Location->Name);
+                        }
+                        else if($1->A_Type=="ptr")
+                        {
+                            QuadArray::Emit("*=",$1->Array->Name,$3->Location->Name);
+                        }
+                        else
+                        {
+                            $3->Location = TypeConvertor($3->Location,$1->Array->Type->Type);
+                            QuadArray::Emit("=",$1->Array->Name,$3->Location->Name);
+                        }
+                        $$ = $3;
                         //$$ = createNode("assignment_expression",$1,createNode("ignore",createNode("ASSIGN", NULL, NULL),$3)); 
                     }
                      | unary_expression MUL_EQUAL assignment_expression 
                     { 
+                        if($1->A_Type=="arr")
+                        {
+                            $3->Location = TypeConvertor($3->Location,$1->Type->Type);
+                            QuadArray::Emit("[]=",$1->Array->Name,$1->Location->Name,$3->Location->Name);
+                        }
+                        else if($1->A_Type=="ptr")
+                        {
+                            QuadArray::Emit("*=",$1->Array->Name,$3->Location->Name);
+                        }
+                        else
+                        {
+                            $3->Location = TypeConvertor($3->Location,$1->Array->Type->Type);
+                            QuadArray::Emit("=",$1->Array->Name,$3->Location->Name);
+                        }
+                        $$ = $3;
                         //$$ = createNode("assignment_expression",$1,createNode("ignore",createNode("MUL_EQUAL", NULL, NULL),$3)); 
                     }
                      | unary_expression DIV_EQUAL assignment_expression 
                     {
+                        if($1->A_Type=="arr")
+                        {
+                            $3->Location = TypeConvertor($3->Location,$1->Type->Type);
+                            QuadArray::Emit("[]=",$1->Array->Name,$1->Location->Name,$3->Location->Name);
+                        }
+                        else if($1->A_Type=="ptr")
+                        {
+                            QuadArray::Emit("*=",$1->Array->Name,$3->Location->Name);
+                        }
+                        else
+                        {
+                            $3->Location = TypeConvertor($3->Location,$1->Array->Type->Type);
+                            QuadArray::Emit("=",$1->Array->Name,$3->Location->Name);
+                        }
+                        $$ = $3;
                         //$$ = createNode("assignment_expression",$1,createNode("ignore",createNode("DIV_EQUAL", NULL, NULL),$3)); 
                     }
                      | unary_expression MOD_EQUAL assignment_expression 
                     { 
+                        if($1->A_Type=="arr")
+                        {
+                            $3->Location = TypeConvertor($3->Location,$1->Type->Type);
+                            QuadArray::Emit("[]=",$1->Array->Name,$1->Location->Name,$3->Location->Name);
+                        }
+                        else if($1->A_Type=="ptr")
+                        {
+                            QuadArray::Emit("*=",$1->Array->Name,$3->Location->Name);
+                        }
+                        else
+                        {
+                            $3->Location = TypeConvertor($3->Location,$1->Array->Type->Type);
+                            QuadArray::Emit("=",$1->Array->Name,$3->Location->Name);
+                        }
+                        $$ = $3;
                         //$$ = createNode("assignment_expression",$1,createNode("ignore",createNode("MOD_EQUAL", NULL, NULL),$3)); 
                     }
                      | unary_expression PLUS_EQUAL assignment_expression 
                     {
+                        if($1->A_Type=="arr")
+                        {
+                            $3->Location = TypeConvertor($3->Location,$1->Type->Type);
+                            QuadArray::Emit("[]=",$1->Array->Name,$1->Location->Name,$3->Location->Name);
+                        }
+                        else if($1->A_Type=="ptr")
+                        {
+                            QuadArray::Emit("*=",$1->Array->Name,$3->Location->Name);
+                        }
+                        else
+                        {
+                            $3->Location = TypeConvertor($3->Location,$1->Array->Type->Type);
+                            QuadArray::Emit("=",$1->Array->Name,$3->Location->Name);
+                        }
+                        $$ = $3;
                         //$$ = createNode("assignment_expression",$1,createNode("ignore",createNode("PLUS_EQUAL", NULL, NULL),$3)); 
                     }
                      | unary_expression MINUS_EQUAL assignment_expression
                     {
+                        if($1->A_Type=="arr")
+                        {
+                            $3->Location = TypeConvertor($3->Location,$1->Type->Type);
+                            QuadArray::Emit("[]=",$1->Array->Name,$1->Location->Name,$3->Location->Name);
+                        }
+                        else if($1->A_Type=="ptr")
+                        {
+                            QuadArray::Emit("*=",$1->Array->Name,$3->Location->Name);
+                        }
+                        else
+                        {
+                            $3->Location = TypeConvertor($3->Location,$1->Array->Type->Type);
+                            QuadArray::Emit("=",$1->Array->Name,$3->Location->Name);
+                        }
+                        $$ = $3;
                         //$$ = createNode("assignment_expression",$1,createNode("ignore",createNode("MINUS_EQUAL", NULL, NULL),$3)); 
                     }                
                      | unary_expression SHIFT_LEFT_EQUAL assignment_expression
                     {
+                        if($1->A_Type=="arr")
+                        {
+                            $3->Location = TypeConvertor($3->Location,$1->Type->Type);
+                            QuadArray::Emit("[]=",$1->Array->Name,$1->Location->Name,$3->Location->Name);
+                        }
+                        else if($1->A_Type=="ptr")
+                        {
+                            QuadArray::Emit("*=",$1->Array->Name,$3->Location->Name);
+                        }
+                        else
+                        {
+                            $3->Location = TypeConvertor($3->Location,$1->Array->Type->Type);
+                            QuadArray::Emit("=",$1->Array->Name,$3->Location->Name);
+                        }
+                        $$ = $3;
                         //$$ = createNode("assignment_expression",$1,createNode("ignore",createNode("SHIFT_LEFT_EQUAL", NULL, NULL),$3)); 
                     }                     
                     | unary_expression SHIFT_RIGHT_EQUAL assignment_expression
                     {
+                        if($1->A_Type=="arr")
+                        {
+                            $3->Location = TypeConvertor($3->Location,$1->Type->Type);
+                            QuadArray::Emit("[]=",$1->Array->Name,$1->Location->Name,$3->Location->Name);
+                        }
+                        else if($1->A_Type=="ptr")
+                        {
+                            QuadArray::Emit("*=",$1->Array->Name,$3->Location->Name);
+                        }
+                        else
+                        {
+                            $3->Location = TypeConvertor($3->Location,$1->Array->Type->Type);
+                            QuadArray::Emit("=",$1->Array->Name,$3->Location->Name);
+                        }
+                        $$ = $3;
                         //$$ = createNode("assignment_expression",$1,createNode("ignore",createNode("PLUS_EQUAL", NULL, NULL),$3)); 
                     }
 
                      | unary_expression BITWISE_AND_EQUAL assignment_expression
                     {
+                        if($1->A_Type=="arr")
+                        {
+                            $3->Location = TypeConvertor($3->Location,$1->Type->Type);
+                            QuadArray::Emit("[]=",$1->Array->Name,$1->Location->Name,$3->Location->Name);
+                        }
+                        else if($1->A_Type=="ptr")
+                        {
+                            QuadArray::Emit("*=",$1->Array->Name,$3->Location->Name);
+                        }
+                        else
+                        {
+                            $3->Location = TypeConvertor($3->Location,$1->Array->Type->Type);
+                            QuadArray::Emit("=",$1->Array->Name,$3->Location->Name);
+                        }
+                        $$ = $3;
                         //$$ = createNode("assignment_expression",$1,createNode("ignore",createNode("BITWISE_AND_EQUAL", NULL, NULL),$3)); 
                     }
 
                      | unary_expression BITWISE_XOR_EQUAL assignment_expression
                     {
+                        if($1->A_Type=="arr")
+                        {
+                            $3->Location = TypeConvertor($3->Location,$1->Type->Type);
+                            QuadArray::Emit("[]=",$1->Array->Name,$1->Location->Name,$3->Location->Name);
+                        }
+                        else if($1->A_Type=="ptr")
+                        {
+                            QuadArray::Emit("*=",$1->Array->Name,$3->Location->Name);
+                        }
+                        else
+                        {
+                            $3->Location = TypeConvertor($3->Location,$1->Array->Type->Type);
+                            QuadArray::Emit("=",$1->Array->Name,$3->Location->Name);
+                        }
+                        $$ = $3;
                         //$$ = createNode("assignment_expression",$1,createNode("ignore",createNode("BITWISE_XOR_EQUAL", NULL, NULL),$3)); 
                     }
 
                      | unary_expression BITWISE_OR_EQUAL assignment_expression
                     {
+                        if($1->A_Type=="arr")
+                        {
+                            $3->Location = TypeConvertor($3->Location,$1->Type->Type);
+                            QuadArray::Emit("[]=",$1->Array->Name,$1->Location->Name,$3->Location->Name);
+                        }
+                        else if($1->A_Type=="ptr")
+                        {
+                            QuadArray::Emit("*=",$1->Array->Name,$3->Location->Name);
+                        }
+                        else
+                        {
+                            $3->Location = TypeConvertor($3->Location,$1->Array->Type->Type);
+                            QuadArray::Emit("=",$1->Array->Name,$3->Location->Name);
+                        }
+                        $$ = $3;
                         //$$ = createNode("assignment_expression",$1,createNode("ignore",createNode("BITWISE_OR_EQUAL", NULL, NULL),$3)); 
                     }                   
                     ;
@@ -572,6 +957,7 @@ assignment_expression : conditional_expression
 
 expression : assignment_expression 
             {
+                $$ = $1;
                 //$$ = createNode("expression",$1,NULL); 
             }
            | expression COMMA assignment_expression 
@@ -661,10 +1047,16 @@ init_declarator_list : init_declarator
 
 init_declarator : declarator 
                 {
+                    $$ = $1;
                     //$$ = createNode("init_declerator", $1,NULL);
                 }
                 | declarator ASSIGN initializer 
                 {
+                    if($3->InitialValue!="")
+                    {
+                        $1->InitialValue = $3->InitialValue;
+                    }
+                    QuadArray::Emit("=".$1->Name,$3->Name);
                     //$$ = createNode("init_declerator", $1, createNode("ignore",createNode("ASSIGN",NULL,NULL),$3));
                 }
                 ;
@@ -693,50 +1085,62 @@ storage_class_specifier : EXTERN
 
 type_specifier : VOID 
                 {
+                    VarType="void";
                     // $$ = createNode("type_specifier", createNode("VOID",NULL,NULL), NULL); 
                 }
                 | CHAR 
                 {
+                    VarType="char";
                     // $$ = createNode("type_specifier", createNode("CHARACTER",NULL,NULL), NULL); 
                 }
                 | SHORT 
                 {
+                    VarType="short";
                     // $$ = createNode("type_specifier", createNode("SHORT",NULL,NULL), NULL); 
                 }
                 | INT 
                 {
+                    VarType="int";
                     // $$ = createNode("type_specifier", createNode("INTEGER",NULL,NULL), NULL); 
                 }
                 | LONG 
                 {
+                    VarType="long";
                     // $$ = createNode("type_specifier", createNode("LONG",NULL,NULL), NULL); 
                 }
                 | FLOAT 
                 {
+                    VarType="float";
                     // $$ = createNode("type_specifier", createNode("FLOAT",NULL,NULL), NULL); 
                 }
                 | SIGNED 
                 {
+                    VarType="signed";
                     // $$ = createNode("type_specifier", createNode("SIGNED",NULL,NULL), NULL); 
                 }
                 | UNSIGNED 
                 {
+                    VarType="unsigned";
                     // $$ = createNode("type_specifier", createNode("UNSIGNED",NULL,NULL), NULL); 
                 }
                 | BOOL 
                 {
+                    VarType="bool";
                     // $$ = createNode("type_specifier", createNode("_BOOL",NULL,NULL), NULL); 
                 }
                 | COMPLEX 
                 {
+                    VarType="complex";
                     // $$ = createNode("type_specifier", createNode("_COMPLEX",NULL,NULL), NULL); 
                 }
                 | IMAGINARY 
                 {
+                    VarType="imaginary";
                     // $$ = createNode("type_specifier", createNode("_IMAGINARY",NULL,NULL), NULL); 
                 }
                 | DOUBLE 
                 {
+                    VarType="double";
                     // $$ = createNode("type_specifier", createNode("DOUBLE",NULL,NULL), NULL); 
                 }
                 ;
@@ -787,9 +1191,20 @@ function_specifier : INLINE
 
 /*_______ DECLARATOR ________*/
 
-declarator : pointer_opt direct_declarator 
+declarator : pointer direct_declarator 
             {
+                SType* S = $1;
+                while(S->A_Type!=NULL)
+                {
+                    S = S->A_Type;
+                } 
+                S->A_Type = $2->Type;
+                $$ = $2->update($1);
                 //$$ = createNode("declarator", $1, $2);
+            }
+            | direct_declarator
+            {
+
             }
             ;
 
@@ -797,10 +1212,16 @@ declarator : pointer_opt direct_declarator
 
 direct_declarator : IDENTIFIER 
                     {
+                        Symbol* NewS = Symbol(Globe);
+                        CurrentST->Table.push_back(*NewS);
+                        $$ = &(CurrentST->Table.back())
+                        $$->Update(new SType(VarType));
+                        RecentSymbol = $$;
                         //$$ = createNode("direct_declarator", createNode("IDENTIFIER",NULL,NULL), NULL);
                     }
                     | ROUND_BRACKET_OPEN declarator ROUND_BRACKET_CLOSE 
                     {
+                        $$ = $2;
                         //$$ = createNode("direct_declarator",createNode("ignore",createNode("ROUND_BRACKET_OPEN",NULL,NULL),$2), createNode("ROUND_BRACKET_CLOSE",NULL,NULL));
                     }
                     | direct_declarator SQUARE_BRACKET_OPEN  type_qualifier_list_opt assignment_expression_opt SQUARE_BRACKET_CLOSE 
@@ -859,22 +1280,14 @@ identifier_list_opt :  {
 
 /*_______ POINTER ________*/
 
-pointer_opt :  
-        {
-            //$$ = createNode("pointer_opt",NULL,NULL);
-        }
-        |pointer 
-        {
-            //$$ = createNode("pointer_opt",$1,NULL);
-        }
-        ;
-
 pointer : MUL type_qualifier_list_opt 
         {
+            $$ = new SType("ptr");
             //$$=createNode("pointer",createNode("MUL",NULL,NULL), $2);
         }
         | MUL type_qualifier_list_opt pointer 
         {
+            $$ = new SType("ptr",$3);
             //$$=createNode("pointer",createNode("MUL",NULL,NULL) ,createNode("ignore",$2, $3));
         }
         ;
@@ -950,6 +1363,7 @@ type_name : specifier_qualifier_list
 
 initializer : assignment_expression 
             {
+                $$ = $1;
                 //$$=createNode("initializer",$1,NULL);
             }
             | CURLY_BRACKET_OPEN initializer_list CURLY_BRACKET_CLOSE 
@@ -1027,22 +1441,28 @@ statement : labeled_statement
             }
             | compound_statement 
             {
+                $$ = $1;
                 //$$=createNode("statement",$1,NULL);
             }
             | expression_statement 
             {
+                $$ = new Expression();
+                $$->NextList = $1->NextList;
                 //$$=createNode("statement",$1,NULL);
             }
             | selection_statement 
             {
+               $$ = $1;
                 //$$=createNode("statement",$1,NULL);
             }
             | iteration_statement 
             {
+                $$ = $1;
                 //$$=createNode("statement",$1,NULL);
             }
             | jump_statement 
             {
+                $$ = $1;
                 //$$=createNode("statement",$1,NULL);
             }
             ;

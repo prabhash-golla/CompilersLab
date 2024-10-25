@@ -13,7 +13,7 @@ int func (int i, float d) {
     d = 2.3;
     d = (float)i;
     d = d/2.3;
-    d = d*2.3;
+    d = d*2;
     d = d+w[2];
     return i;
 }

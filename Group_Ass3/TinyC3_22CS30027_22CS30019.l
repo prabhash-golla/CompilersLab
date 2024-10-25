@@ -103,7 +103,7 @@ WS							[ \t\v\n\f]
 "_Complex"					{return COMPLEX;}
 "_Imaginary"				{return IMAGINARY;}
 
-{IDENTIFIER}				{return IDENTIFIER;}
+{IDENTIFIER}				{Globe=yytext;return IDENTIFIER;}
 {INTEGER}	        		{yylval.INTVAL=atoi(yytext);return INTEGER;}
 {FLOATING_CONSTANT}	        {yylval.FLOATVAL=atof(yytext);return FLOATING_CONSTANT;}
 {CHARACTER_CONSTANT}        {return CHARACTER_CONSTANT;}
