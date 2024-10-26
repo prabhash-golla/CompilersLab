@@ -1,36 +1,31 @@
-// Declarations (variables, pointers, 1D array, 2D array, functions) and arithmetic operations
+#include <stdio.h>
 
-// Global declarations
-float d = 2.3;
-char c;	
-int e, f, g, h, i, j, k;
-float l, m, n, o, p;
-int w[10];                      
-float f[20][50];                
-int a = 4, *p, b;               
-
-int func (int i, float d) {
-    d = 2.3;
-    d = (float)i;
-    d = d/2.3;
-    d = d*2;
-    d = d+w[2];
-    return i;
+// Function to swap values using pointers
+void swap(int *x, int *y) {
+    int temp = *x;
+    *x = *y;
+    *y = temp;
 }
 
-int main () {
-    int p = 120;
-    int q = 17;
-    char ch = 'c', d = 'a'; 
-    i = p + q;
-    j = p - q;
-    k = p * q;
-    l = p / q;
-    m = p % q;
-    n = p & q;
-    o = p | q;
-    q = i << 2;
-    p = i >> 1;
-    func(i, i);
-    return 0;
+// Function to compute the sum of an array using pointers
+int array_sum(int *arr, int size) {
+    int sum = 0;
+    for (int i = 0; i < size; i++) {
+        sum += *(arr + i);  // Dereference pointer to access array elements
+    }
+    return sum;
+}
+
+int main() {
+    int a = 10, b = 20;
+    int values[5] = {1, 2, 3, 4, 5};
+    int total;
+
+    // Call function to swap values of 'a' and 'b' using pointers
+    swap(&a, &b);
+
+    // Call function to compute the sum of array elements using a pointer
+    total = array_sum(values, 5);
+
+    return total;
 }

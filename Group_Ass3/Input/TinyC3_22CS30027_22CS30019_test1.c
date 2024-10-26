@@ -1,36 +1,13 @@
-// Declarations (variables, pointers, 1D array, 2D array, functions) and arithmetic operations
+int main() {
+    int x = 10, y = 20, z = 30;
+    float f = 3.14;
+    int result;
 
-// Global declarations
-float d = 2.3;
-char c;	
-int e, f, g, h, i, j, k;
-float l, m, n, o, p;
-int w[10];                      
-float f[20][50];                
-int a = 4, *p, b;               
+    // Perform nested arithmetic with type casting: multiply float with int, cast to int, and subtract from x
+    result = x + (int)(f * y) - z;
 
-int func (int i, float d) {
-    d = 2.3;
-    d = (float)i;
-    d = d/2.3;
-    d = d*2;
-    d = d+w[2];
-    return i;
-}
+    // Test mixed operators and precedence: includes arithmetic, bitwise and logical operators
+    result = (x * y) / (z - x) + (x & y) - (y | z);
 
-int main () {
-    int p = 120;
-    int q = 17;
-    char ch = 'c', d = 'a'; 
-    i = p + q;
-    j = p - q;
-    k = p * q;
-    l = p / q;
-    m = p % q;
-    n = p & q;
-    o = p | q;
-    q = i << 2;
-    p = i >> 1;
-    func(i, i);
-    return 0;
+    return result;
 }
