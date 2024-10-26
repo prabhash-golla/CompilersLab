@@ -13,7 +13,7 @@
     extern int yylineno;
     int yylex();
     extern string Globe;
-    void yyerror(char *ERRORS);
+    void yyerror(string ERRORS);
    
 %}
 
@@ -504,7 +504,7 @@ relational_expression : shift_expression
                         if(TypeCheck($1->Location,$3->Location))
                         {
                             $$ = new Expression();
-                            $$->Type=="bool";
+                            $$->Type="bool";
                             $$->TrueList= MakeList(QuadList.InstructionList.size());
                             $$->FalseList= MakeList(QuadList.InstructionList.size()+1);
                             QuadArray::Emit("<","",$1->Location->Name,$3->Location->Name);
@@ -521,7 +521,7 @@ relational_expression : shift_expression
                         if(TypeCheck($1->Location,$3->Location))
                         {
                             $$ = new Expression();
-                            $$->Type=="bool";
+                            $$->Type="bool";
                             $$->TrueList= MakeList(QuadList.InstructionList.size());
                             $$->FalseList= MakeList(QuadList.InstructionList.size()+1);
                             QuadArray::Emit(">","",$1->Location->Name,$3->Location->Name);
@@ -538,7 +538,7 @@ relational_expression : shift_expression
                         if(TypeCheck($1->Location,$3->Location))
                         {
                             $$ = new Expression();
-                            $$->Type=="bool";
+                            $$->Type="bool";
                             $$->TrueList= MakeList(QuadList.InstructionList.size());
                             $$->FalseList= MakeList(QuadList.InstructionList.size()+1);
                             QuadArray::Emit("<=","",$1->Location->Name,$3->Location->Name);
@@ -555,7 +555,7 @@ relational_expression : shift_expression
                         if(TypeCheck($1->Location,$3->Location))
                         {
                             $$ = new Expression();
-                            $$->Type=="bool";
+                            $$->Type="bool";
                             $$->TrueList= MakeList(QuadList.InstructionList.size());
                             $$->FalseList= MakeList(QuadList.InstructionList.size()+1);
                             QuadArray::Emit(">=","",$1->Location->Name,$3->Location->Name);
@@ -583,7 +583,7 @@ equality_expression : relational_expression
                             $$ = new Expression();
                             btoi($1);
                             btoi($3);
-                            $$->Type=="bool";
+                            $$->Type="bool";
                             $$->TrueList= MakeList(QuadList.InstructionList.size());
                             $$->FalseList= MakeList(QuadList.InstructionList.size()+1);
                             QuadArray::Emit("==","",$1->Location->Name,$3->Location->Name);
@@ -602,7 +602,7 @@ equality_expression : relational_expression
                             $$ = new Expression();
                             btoi($1);
                             btoi($3);
-                            $$->Type=="bool";
+                            $$->Type="bool";
                             $$->TrueList= MakeList(QuadList.InstructionList.size());
                             $$->FalseList= MakeList(QuadList.InstructionList.size()+1);
                             QuadArray::Emit("!=","",$1->Location->Name,$3->Location->Name);
@@ -630,7 +630,7 @@ and_expression : equality_expression
                         $$ = new Expression();
                         btoi($1);
                         btoi($3);
-                        $$->Type=="notbool";
+                        $$->Type="notbool";
                         $$->Location = SymbolTable::GenTemp(new SType("int"));
                         QuadArray::Emit("&",$$->Location->Name,$1->Location->Name,$3->Location->Name);
                     }
@@ -656,7 +656,7 @@ exclusive_or_expression : and_expression
                                 $$ = new Expression();
                                 btoi($1);
                                 btoi($3);
-                                $$->Type=="notbool";
+                                $$->Type="notbool";
                                 $$->Location = SymbolTable::GenTemp(new SType("int"));
                                 QuadArray::Emit("^",$$->Location->Name,$1->Location->Name,$3->Location->Name);
                             }
@@ -682,7 +682,7 @@ inclusive_or_expression : exclusive_or_expression
                                 $$ = new Expression();
                                 btoi($1);
                                 btoi($3);
-                                $$->Type=="notbool";
+                                $$->Type="notbool";
                                 $$->Location = SymbolTable::GenTemp(new SType("int"));
                                 QuadArray::Emit("|",$$->Location->Name,$1->Location->Name,$3->Location->Name);
                             }
@@ -1797,8 +1797,8 @@ declaration_list : declaration
 
 
 %%
-void yyerror(char *ERRORS) {
-    fprintf(stderr, "Error: %s\n", ERRORS);
+void yyerror(string ERRORS) {
+    cout << "Error :" << ERRORS << '\n';
 }
 
 

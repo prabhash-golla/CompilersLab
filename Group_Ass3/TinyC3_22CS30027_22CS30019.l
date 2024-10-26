@@ -1,6 +1,6 @@
 %{
 	#include "y.tab.h"
-	extern void yyerror(char *);
+	extern void yyerror(string);
 	/*
 		Group :- TinyC-67
 		Golla Meghanandh Manvith Prabhash :- 22CS30027
