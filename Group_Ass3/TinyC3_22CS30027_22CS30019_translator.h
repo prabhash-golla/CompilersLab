@@ -148,7 +148,7 @@ class Quad
 // Global Functions;
 
 list<int> MakeList(int i);
-list<int>* Merge(list<int> &p1,list<int> &p2);
+list<int> Merge(list<int> &p1,list<int> &p2);
 void BackPath(list<int> &p,int i);
 bool TypeCheck(Symbol* &E1,Symbol* &E2);
 bool TypeCheck(SType* E1,SType* E2);

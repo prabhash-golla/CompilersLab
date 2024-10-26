@@ -62,14 +62,14 @@
 
 %type<UnaryOper> unary_operator
 
-%type<SymbolPointer> declaration init_declarator direct_declarator initializer
+%type<SymbolPointer> declaration declarator init_declarator direct_declarator initializer
 
 %type<Type> pointer
 
 %type<Stateme> statement iteration_statement jump_statement selection_statement labeled_statement compound_statement expression_statement block_item block_item_list block_item_list_opt
 
 %type<Express> additive_expression  and_expression assignment_expression assignment_expression_opt   conditional_expression constant constant_expression  declaration_list declaration_list_opt 
-declaration_specifiers declarator designator designator_list designation designation_opt  exclusive_or_expression expression expression_opt external_declaration function_definition function_specifier identifier_list identifier_list_opt inclusive_or_expression  
+declaration_specifiers designator designator_list designation designation_opt  exclusive_or_expression expression expression_opt external_declaration function_definition function_specifier identifier_list identifier_list_opt inclusive_or_expression  
 initializer_list  init_declarator_list  logical_and_expression logical_or_expression multiplicative_expression parameter_declaration parameter_list parameter_type_list primary_expression relational_expression
  specifier_qualifier_list shift_expression storage_class_specifier 
 %type<Express> type_name type_qualifier type_qualifier_list type_qualifier_list_opt type_specifier equality_expression    translation_unit init_declarator_list_opt pointer_opt
@@ -718,7 +718,7 @@ logical_and_expression : inclusive_or_expression
 
 logical_or_expression : logical_and_expression 
                         { 
-                            $$ = $1
+                            $$ = $1;
                             //$$ = createNode("logical_or_expression",$1,NULL); 
                         }
                       | logical_or_expression OR logical_and_expression 
@@ -758,7 +758,7 @@ conditional_expression : logical_or_expression
                             itob($1);
                             BackPath($1->TrueList,$4);
                             BackPath($1->FalseList,$8);
-                            BackPath(ll,QuadList.InstructionList.size())
+                            BackPath(ll,QuadList.InstructionList.size());
                             //$$ = createNode("conditional_expression",$1,createNode("ignore",createNode("QUESTION", NULL, NULL),createNode("ignore",$3,createNode("ignore",createNode("COLON", NULL, NULL),$5))));
                         }
                       ;
@@ -1101,7 +1101,7 @@ init_declarator : declarator
                     {
                         $1->InitialValue = $3->InitialValue;
                     }
-                    QuadArray::Emit("=".$1->Name,$3->Name);
+                    QuadArray::Emit("=",$1->Name,$3->Name);
                     //$$ = createNode("init_declerator", $1, createNode("ignore",createNode("ASSIGN",NULL,NULL),$3));
                 }
                 ;
@@ -1239,12 +1239,12 @@ function_specifier : INLINE
 declarator : pointer direct_declarator 
             {
                 SType* S = $1;
-                while(S->A_Type!=NULL)
+                while(S->ArrType!=NULL)
                 {
-                    S = S->A_Type;
+                    S = S->ArrType;
                 } 
-                S->A_Type = $2->Type;
-                $$ = $2->update($1);
+                S->ArrType = $2->Type;
+                $$ = $2->Update($1);
                 //$$ = createNode("declarator", $1, $2);
             }
             | direct_declarator
@@ -1257,9 +1257,9 @@ declarator : pointer direct_declarator
 
 direct_declarator : IDENTIFIER 
                     {
-                        Symbol* NewS = Symbol(Globe);
+                        Symbol* NewS = new Symbol(Globe);
                         CurrentST->Table.push_back(*NewS);
-                        $$ = &(CurrentST->Table.back())
+                        $$ = &(CurrentST->Table.back());
                         $$->Update(new SType(VarType));
                         RecentSymbol = $$;
                         //$$ = createNode("direct_declarator", createNode("IDENTIFIER",NULL,NULL), NULL);
@@ -1289,13 +1289,13 @@ direct_declarator : IDENTIFIER
                         }
                         if(Prev==NULL)
                         {
-                            SType* Temp2 = new SType("arr",S1->Type,Temp);
+                            SType* Temp2 = new SType("arr",Temp,$1->Type);
                             $$ = $1->Update(Temp2);
                         }
                         else
                         {
-                            SType* Temp2 = new SType("arr",S,Temp);
-                            prev->ArrType = Temp2
+                            SType* Temp2 = new SType("arr",Temp,S);
+                            Prev->ArrType = Temp2;
                             $$ = $1->Update($1->Type);
                         }
                         //$$ = createNode("direct_declarator", createNode("ignore",$1,createNode("SQUARE_BRACKET_OPEN",NULL,NULL)), createNode("ignore",$3,createNode("ignore",$4,createNode("SQUARE_BRACKET_CLOSE",NULL,NULL))));
@@ -1311,13 +1311,13 @@ direct_declarator : IDENTIFIER
                         }
                         if(Prev==NULL)
                         {
-                            SType* Temp = new SType("arr",S1->Type,0);
+                            SType* Temp = new SType("arr",0,$1->Type);
                             $$ = $1->Update(Temp);
                         }
                         else
                         {
-                            SType* Temp = new SType("arr",S,0);
-                            prev->ArrType = Temp
+                            SType* Temp = new SType("arr",0,S);
+                            Prev->ArrType = Temp;
                             $$ = $1->Update($1->Type);
                         }
                     }
@@ -1418,7 +1418,7 @@ pointer : MUL type_qualifier_list_opt
         }
         | MUL type_qualifier_list_opt pointer 
         {
-            $$ = new SType("ptr",$3);
+            $$ = new SType("ptr",1,$3);
             //$$=createNode("pointer",createNode("MUL",NULL,NULL) ,createNode("ignore",$2, $3));
         }
         ;
@@ -1494,7 +1494,7 @@ type_name : specifier_qualifier_list
 
 initializer : assignment_expression 
             {
-                $$ = $1;
+                $$ = $1->Location;
                 //$$=createNode("initializer",$1,NULL);
             }
             | CURLY_BRACKET_OPEN initializer_list CURLY_BRACKET_CLOSE 
@@ -1577,7 +1577,7 @@ statement : labeled_statement
             }
             | expression_statement 
             {
-                $$ = new Expression();
+                $$ = new Statement();
                 $$->NextList = $1->NextList;
                 //$$=createNode("statement",$1,NULL);
             }

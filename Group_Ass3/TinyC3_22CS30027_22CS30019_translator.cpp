@@ -254,10 +254,10 @@ list<int> MakeList(int i)
     return l;
 } 
 
-list<int>* Merge(list<int> &p1,list<int> &p2)
+list<int> Merge(list<int> &p1,list<int> &p2)
 {
     p1.merge(p2);
-    return &p1;
+    return p1;
 }
 
 void BackPath(list<int> &p,int i)
