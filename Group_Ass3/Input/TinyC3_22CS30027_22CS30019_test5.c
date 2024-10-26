@@ -1,5 +1,3 @@
-#include <stdio.h>
-
 int main() {
     int a = 5;
     int b = 10;
@@ -15,12 +13,15 @@ int main() {
     *p2 = temp;       // the value at p2 is set to temp (initial value of a)
 
     // Pointer arithmetic
-    int array[3] = {1, 2, 3};
+    int array[3] ;
+    array[0]=1;
+    array[1]=2;
+    array[2]=3;
     int *ptr = array; // ptr points to the beginning of array
 
     int sum = 0;
     for (int i = 0; i < 3; i++) {
-        sum += *(ptr + i); // Access each element by incrementing pointer
+        // sum += *(ptr + i); // Access each element by incrementing pointer
     }
 
     return sum;
