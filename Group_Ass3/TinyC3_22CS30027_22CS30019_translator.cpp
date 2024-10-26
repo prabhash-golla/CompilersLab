@@ -296,6 +296,53 @@ bool TypeCheck(SType* E1,SType* E2)
     if(E1->Type!=E2->Type) return false;
     return TypeCheck(E1->ArrType,E2->ArrType);
 }
+// TypeConvertor function to convert a symbol of one type to another type 
+Symbol* TypeConvertor(Symbol* Old, string New) {
+    // Generate a temporary symbol with the new type
+    Symbol* Temp = SymbolTable::GenTemp(new SType(New));
+
+    // Check if the current type of Old is "float"
+    if (Old->Type->Type == "float") {
+        if (New == "int") {
+            QuadArray::Emit("=", Temp->Name, "floattoint(" + Old->Name + ")");
+            return Temp;
+        }
+        else if (New == "char") {
+            QuadArray::Emit("=", Temp->Name, "floattochar(" + Old->Name + ")");
+            return Temp;
+        }
+        return Old;
+    }
+
+    // Check if the current type of Old is "int"
+    else if (Old->Type->Type == "int") {
+        if (New == "float") {
+            QuadArray::Emit("=", Temp->Name, "inttofloat(" + Old->Name + ")");
+            return Temp;
+        }
+        else if (New == "char") {
+            QuadArray::Emit("=", Temp->Name, "inttochar(" + Old->Name + ")");
+            return Temp;
+        }
+        return Old;
+    }
+
+    // Check if the current type of Old is "char"
+    else if (Old->Type->Type == "char") {
+        if (New == "float") {
+            QuadArray::Emit("=", Temp->Name, "chartofloat(" + Old->Name + ")");
+            return Temp;
+        }
+        else if (New == "int") {
+            QuadArray::Emit("=", Temp->Name, "chartoint(" + Old->Name + ")");
+            return Temp;
+        }
+        return Old;
+    }
+
+    // Return original symbol if no conversion is required
+    return Old;
+}
 
 int SizeOfS(SType* S)
 {
