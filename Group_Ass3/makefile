@@ -1,17 +1,27 @@
 .SUFFIXES:
 
-run:  TinyC3_22CS30027_22CS30019.out
-	./TinyC3_22CS30027_22CS30019.out < input_22CS30027_22CS30019.c > output_22CS30027_22CS30019.txt
+all: TinyC3_22CS30027_22CS30019.out
+	mkdir -p Output
+	./TinyC3_22CS30027_22CS30019.out < ./Input/TinyC3_22CS30027_22CS30019_test1.c > ./Output/TinyC3_22CS30027_22CS30019_quads1.out
+	./TinyC3_22CS30027_22CS30019.out < ./Input/TinyC3_22CS30027_22CS30019_test2.c > ./Output/TinyC3_22CS30027_22CS30019_quads2.out
+	./TinyC3_22CS30027_22CS30019.out < ./Input/TinyC3_22CS30027_22CS30019_test3.c > ./Output/TinyC3_22CS30027_22CS30019_quads3.out
+	./TinyC3_22CS30027_22CS30019.out < ./Input/TinyC3_22CS30027_22CS30019_test4.c > ./Output/TinyC3_22CS30027_22CS30019_quads4.out
+	./TinyC3_22CS30027_22CS30019.out < ./Input/TinyC3_22CS30027_22CS30019_test5.c > ./Output/TinyC3_22CS30027_22CS30019_quads5.out
 
-TinyC3_22CS30027_22CS30019.out: all
+TinyC3_22CS30027_22CS30019.out: TinyC3_22CS30027_22CS30019_translator.cpp lex.yy.c y.tab.c y.tab.h
+	g++ -o TinyC3_22CS30027_22CS30019.out TinyC3_22CS30027_22CS30019_translator.cpp
 
-all:
-	yacc -d TinyC3_22CS30027_22CS30019.y 
+y.tab.c: TinyC3_22CS30027_22CS30019.y
+	yacc -dv TinyC3_22CS30027_22CS30019.y
+
+y.tab.h: TinyC3_22CS30027_22CS30019.y
+	yacc -dv TinyC3_22CS30027_22CS30019.y
+
+lex.yy.c:
 	lex TinyC3_22CS30027_22CS30019.l
-	g++ -g -o TinyC3_22CS30027_22CS30019.out TinyC3_22CS30027_22CS30019_translator.cpp
 
 couterexamples:
 	yacc -d -Wcounterexamples TinyC3_22CS30027_22CS30019.y 	
 
 clean:
-	rm lex.yy.c y.tab.c y.tab.h *.out
+	- rm -rf lex.yy.c y.tab.c y.tab.h TinyC3_22CS30027_22CS30019.out y.output Output

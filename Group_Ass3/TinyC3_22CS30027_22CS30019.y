@@ -66,13 +66,13 @@
 
 %type<Type> pointer
 
-%type<Stateme> statement iteration_statement jump_statement selection_statement labeled_statement compound_statement expression_statement block_item block_item_list block_item_list_opt
+%type<Stateme> statement iteration_statement jump_statement selection_statement labeled_statement compound_statement  block_item block_item_list block_item_list_opt loop_block
 
 %type<Express> additive_expression  and_expression assignment_expression assignment_expression_opt   conditional_expression constant constant_expression  declaration_list declaration_list_opt 
-declaration_specifiers designator designator_list designation designation_opt  exclusive_or_expression expression expression_opt external_declaration function_definition function_specifier identifier_list identifier_list_opt inclusive_or_expression  
+declaration_specifiers designator designator_list designation designation_opt  exclusive_or_expression expression expression_opt external_declaration function_definition function_specifier identifier_list inclusive_or_expression  
 initializer_list  init_declarator_list  logical_and_expression logical_or_expression multiplicative_expression parameter_declaration parameter_list parameter_type_list primary_expression relational_expression
- specifier_qualifier_list shift_expression storage_class_specifier 
-%type<Express> type_name type_qualifier type_qualifier_list type_qualifier_list_opt type_specifier equality_expression    translation_unit init_declarator_list_opt pointer_opt
+ specifier_qualifier_list shift_expression storage_class_specifier expression_statement
+%type<Express> type_name type_qualifier type_qualifier_list type_qualifier_list_opt type_specifier equality_expression    translation_unit init_declarator_list_opt
 
 //Augmenting symbols
 %type<Stateme> newstatement
@@ -103,7 +103,7 @@ constant : INTEGER
                 //$$ = createNode("constant",createNode("FLOATING_CONSTANT", NULL, NULL),NULL); 
             }
          | CHARACTER_CONSTANT 
-            { 
+            {
                 $$ = new Expression();
                 $$->Location = SymbolTable::GenTemp(new SType("char"),string($1));
                 QuadArray::Emit("=",$$->Location->Name,$1);
@@ -1399,16 +1399,6 @@ assignment_expression_opt :  {
                             }
                             ;
 
-
-identifier_list_opt :  {
-                        //$$ = createNode("identifier_list_opt",NULL,NULL);
-                        }
-                    | identifier_list 
-                        {
-                            //$$ = createNode("identifier_list_opt",$1,NULL);
-                        }
-                        ;
-
 /*_______ POINTER ________*/
 
 pointer : MUL type_qualifier_list_opt 
@@ -1598,6 +1588,34 @@ statement : labeled_statement
             }
             ;
 
+loop_block:labeled_statement 
+            {
+                //$$=createNode("statement",$1,NULL);
+            }
+            | expression_statement 
+            {
+                $$ = new Statement();
+                $$->NextList = $1->NextList;
+                //$$=createNode("statement",$1,NULL);
+            }
+            | selection_statement 
+            {
+               $$ = $1;
+                //$$=createNode("statement",$1,NULL);
+            }
+            | iteration_statement 
+            {
+                $$ = $1;
+                //$$=createNode("statement",$1,NULL);
+            }
+            | jump_statement 
+            {
+                $$ = $1;
+                //$$=createNode("statement",$1,NULL);
+            }
+            ;
+
+
 /*_______ LABELED STATEMENT ________*/
 
 labeled_statement : IDENTIFIER COLON statement  
@@ -1616,18 +1634,34 @@ labeled_statement : IDENTIFIER COLON statement
 
 /*_______ COMPOUND STATEMENT ________*/
 
-compound_statement : CURLY_BRACKET_OPEN block_item_list_opt CURLY_BRACKET_CLOSE 
+compound_statement : CURLY_BRACKET_OPEN createST switch_table block_item_list_opt CURLY_BRACKET_CLOSE 
                     {
+                        $$ = $4;
+                        CurrentST = CurrentST->PtrToParent;
                         //$$=createNode("compound_statement",createNode("ignore",createNode("CURLY_BRACKET_OPEN",NULL,NULL),$2),createNode("CURLY_BRACKET_CLOSE",NULL,NULL));
                     }
                     ;
 
+createST:
+        {
+            string New_ST = CurrentST->Name+"_"+BlockType+"_"+to_string(SymbolTableCount++);
+            Symbol* TempSym = CurrentST->LookUp(New_ST);
+            TempSym->NestedTable = new SymbolTable(New_ST);
+            TempSym->Name = New_ST;
+            TempSym->NestedTable->PtrToParent = CurrentST;
+            TempSym->Type = new SType("block");
+            RecentSymbol = TempSym;
+        }
+        ;
+
 block_item_list_opt :   
                     {
+                       $$ = new Statement();
                         //$$ = createNode("block_item_list_opt",NULL,NULL);
                     } 
                     | block_item_list 
                     {
+                        $$ = $1;
                         //$$=createNode("block_item_list_opt",$1,NULL);
                     }
                     ;
@@ -1636,10 +1670,13 @@ block_item_list_opt :
 
 block_item_list : block_item  
                 {
+                    $$ = $1;
                     //$$=createNode("block_item_list",$1,NULL);
                 }
-                | block_item_list block_item 
+                | block_item_list countinst block_item 
                 {
+                    $$ = $3;
+                    BackPath($1->NextList,$2);
                     //$$=createNode("block_item_list",$1,$2);
                 }
                 ;
@@ -1648,10 +1685,12 @@ block_item_list : block_item
 
 block_item : declaration  
             {
+                $$ = new Statement();
                 //$$=createNode("block_item",$1,NULL);
             }
             | statement 
             {
+                $$ = $1;
                 //$$=createNode("block_item",$1,NULL);
             }
             ;
@@ -1660,28 +1699,44 @@ block_item : declaration
 
 expression_statement : expression_opt SEMICOLON 
                     {
+                        $$ = $1;
                         //$$=createNode("expression_statement",$1,createNode("SEMICOLON",NULL,NULL));
                     }
-                        ;
+                    ;
 
 expression_opt :   
                 {
+                    $$ = new Expression();
                     //$$ = createNode("expression_opt",NULL,NULL);
                 }
                 | expression  
                 {
+                    $$ = $1;
                     //$$=createNode("expression_opt",$1,NULL);
                 }
                 ;
 
 /*_______ SELECTION STATEMENT ________*/
 
-selection_statement : IF ROUND_BRACKET_OPEN expression ROUND_BRACKET_CLOSE statement %prec THEN 
+selection_statement : IF ROUND_BRACKET_OPEN expression newstatement ROUND_BRACKET_CLOSE countinst statement newstatement %prec THEN 
                     {
+                        BackPath($4->NextList,QuadList.InstructionList.size());
+                        itob($3);
+                        $$ = new Statement();
+                        BackPath($3->TrueList,$6);
+                        list<int> ll = Merge($3->FalseList,$7->NextList);
+                        $$->NextList = Merge(ll,$8->NextList);
                         //$$=createNode("selection_statement",createNode("ignore",createNode("IF",NULL,NULL),createNode("ignore",createNode("ROUND_BRACKET_OPEN",NULL,NULL),$3)),createNode("ignore",createNode("ROUND_BRACKET_CLOSE",NULL,NULL),createNode("ignore",$5,createNode("THEN",NULL,NULL))));
                     }
-                    | IF ROUND_BRACKET_OPEN expression ROUND_BRACKET_CLOSE statement ELSE statement 
+                    | IF ROUND_BRACKET_OPEN expression newstatement ROUND_BRACKET_CLOSE countinst statement newstatement ELSE countinst statement 
                     {
+                        BackPath($4->NextList,QuadList.InstructionList.size());
+                        itob($3);
+                        $$ = new Statement();
+                        BackPath($3->TrueList,$6);
+                        BackPath($3->FalseList,$10);
+                        list<int> ll = Merge($7->NextList,$8->NextList);
+                        $$->NextList = Merge(ll,$11->NextList);
                         //$$=createNode("selection_statement",createNode("ignore",createNode("IF",NULL,NULL),createNode("ignore",createNode("ROUND_BRACKET_OPEN",NULL,NULL),$3)),createNode("ignore",createNode("ROUND_BRACKET_CLOSE",NULL,NULL),createNode("ignore",$5,createNode("ignore",createNode("ELSE",NULL,NULL),$7))));
                     }
                     | SWITCH ROUND_BRACKET_OPEN expression ROUND_BRACKET_CLOSE statement 
@@ -1692,23 +1747,121 @@ selection_statement : IF ROUND_BRACKET_OPEN expression ROUND_BRACKET_CLOSE state
 
 /*_______ ITERATION STATEMENT ________*/
 
-iteration_statement : WHILE ROUND_BRACKET_OPEN expression ROUND_BRACKET_CLOSE statement 
+iteration_statement : WHILE whilestart ROUND_BRACKET_OPEN createST switch_table countinst expression ROUND_BRACKET_CLOSE countinst loop_block 
                     {
+                        $$ = new Statement();
+                        itob($7);
+                        BackPath($10->NextList,$6);
+                        BackPath($7->TrueList,$9);
+                        $$->NextList = $7->FalseList;
+                        QuadArray::Emit("goto",itos($6));
+                        BlockType="";
+                        CurrentST = CurrentST->PtrToParent;
                         //$$=createNode("iteration_statement",createNode("ignore",createNode("WHILE",NULL,NULL),createNode("ignore",createNode("ROUND_BRACKET_OPEN",NULL,NULL),$3)),createNode("ignore",createNode("ROUND_BRACKET_CLOSE",NULL,NULL),$5));
                     }
-                    | DO statement WHILE ROUND_BRACKET_OPEN expression ROUND_BRACKET_CLOSE SEMICOLON 
+                    | WHILE whilestart ROUND_BRACKET_OPEN createST switch_table countinst expression ROUND_BRACKET_CLOSE countinst CURLY_BRACKET_OPEN  block_item_list_opt CURLY_BRACKET_CLOSE  
                     {
+                        $$ = new Statement();
+                        itob($7);
+                        BackPath($11->NextList,$6);
+                        BackPath($7->TrueList,$9);
+                        $$->NextList = $7->FalseList;
+                        QuadArray::Emit("goto",itos($6));
+                        BlockType="";
+                        CurrentST = CurrentST->PtrToParent;
+                        //$$=createNode("iteration_statement",createNode("ignore",createNode("WHILE",NULL,NULL),createNode("ignore",createNode("ROUND_BRACKET_OPEN",NULL,NULL),$3)),createNode("ignore",createNode("ROUND_BRACKET_CLOSE",NULL,NULL),$5));
+                    }
+                    | DO dostart countinst loop_block countinst WHILE ROUND_BRACKET_OPEN expression ROUND_BRACKET_CLOSE SEMICOLON 
+                    {
+                        $$ = new Statement();
+                        itob($8);
+                        BackPath($8->TrueList,$3);
+                        BackPath($4->NextList,$5);
+                        $$->NextList = $8->FalseList;
+                        BlockType="";
                         //$$=createNode("iteration_statement",createNode("DO",NULL,NULL),createNode("ignore",$2,createNode("ignore",createNode("WHILE",NULL,NULL),createNode("ignore",createNode("ROUND_BRACKET_OPEN",NULL,NULL),createNode("ignore",$5,createNode("ignore",createNode("ROUND_BRACKET_CLOSE",NULL,NULL),createNode("SEMICOLON",NULL,NULL)))))));
                     }
-                    | FOR ROUND_BRACKET_OPEN expression_opt SEMICOLON expression_opt SEMICOLON expression_opt ROUND_BRACKET_CLOSE statement 
+                    | DO dostart countinst CURLY_BRACKET_OPEN  block_item_list_opt CURLY_BRACKET_CLOSE  countinst WHILE ROUND_BRACKET_OPEN expression ROUND_BRACKET_CLOSE SEMICOLON 
                     {
+                        $$ = new Statement();
+                        itob($10);
+                        BackPath($10->TrueList,$3);
+                        BackPath($5->NextList,$7);
+                        $$->NextList = $10->FalseList;
+                        BlockType="";
+                        //$$=createNode("iteration_statement",createNode("DO",NULL,NULL),createNode("ignore",$2,createNode("ignore",createNode("WHILE",NULL,NULL),createNode("ignore",createNode("ROUND_BRACKET_OPEN",NULL,NULL),createNode("ignore",$5,createNode("ignore",createNode("ROUND_BRACKET_CLOSE",NULL,NULL),createNode("SEMICOLON",NULL,NULL)))))));
+                    }
+                    | FOR forstart ROUND_BRACKET_OPEN createST switch_table expression_opt SEMICOLON countinst expression_opt SEMICOLON countinst expression_opt newstatement ROUND_BRACKET_CLOSE countinst loop_block 
+                    {
+                        $$ = new Statement();
+                        itob($9);
+                        BackPath($9->TrueList,$15);
+                        BackPath($13->NextList,$8);
+                        BackPath($16->NextList,$11);
+                        QuadArray::Emit("goto",itos($11));
+                        $$->NextList = $9->FalseList;
+                        BlockType = "";
+                        CurrentST = CurrentST->PtrToParent;
                         //$$=createNode("iteration_statement",createNode("FOR",NULL,NULL),createNode("ignore",createNode("ROUND_BRACKET_OPEN",NULL,NULL),createNode("ignore",$3,createNode("ignore",createNode("SEMICOLON",NULL,NULL),createNode("ignore",$5,createNode("ignore",createNode("SEMICOLON",NULL,NULL),createNode("ignore",$7,createNode("ignore",createNode("ROUND_BRACKET_CLOSE",NULL,NULL),$9))))))));
                     }
-                    | FOR ROUND_BRACKET_OPEN declaration expression_opt SEMICOLON expression_opt ROUND_BRACKET_CLOSE statement 
+                    | FOR forstart ROUND_BRACKET_OPEN createST switch_table expression_opt SEMICOLON countinst expression_opt SEMICOLON countinst expression_opt newstatement ROUND_BRACKET_CLOSE countinst CURLY_BRACKET_OPEN block_item_list_opt CURLY_BRACKET_CLOSE  
                     {
+                        $$ = new Statement();
+                        itob($9);
+                        BackPath($9->TrueList,$15);
+                        BackPath($13->NextList,$8);
+                        BackPath($17->NextList,$11);
+                        QuadArray::Emit("goto",itos($11));
+                        $$->NextList = $9->FalseList;
+                        BlockType = "";
+                        CurrentST = CurrentST->PtrToParent;
+                        //$$=createNode("iteration_statement",createNode("FOR",NULL,NULL),createNode("ignore",createNode("ROUND_BRACKET_OPEN",NULL,NULL),createNode("ignore",$3,createNode("ignore",createNode("SEMICOLON",NULL,NULL),createNode("ignore",$5,createNode("ignore",createNode("SEMICOLON",NULL,NULL),createNode("ignore",$7,createNode("ignore",createNode("ROUND_BRACKET_CLOSE",NULL,NULL),$9))))))));
+                    }
+                    | FOR forstart ROUND_BRACKET_OPEN createST switch_table declaration countinst expression_opt SEMICOLON countinst expression_opt newstatement ROUND_BRACKET_CLOSE countinst loop_block 
+                    {
+                        $$ = new Statement();
+                        itob($8);
+                        BackPath($8->TrueList,$14);
+                        BackPath($11->NextList,$7);
+                        BackPath($15->NextList,$10);
+                        QuadArray::Emit("goto",itos($10));
+                        $$->NextList = $8->FalseList;
+                        BlockType = "";
+                        CurrentST = CurrentST->PtrToParent;
+                        //$$=createNode("iteration_statement",createNode("FOR",NULL,NULL),createNode("ignore",createNode("ROUND_BRACKET_OPEN",NULL,NULL),createNode("ignore",$3,createNode("ignore",$4,createNode("ignore",createNode("SEMICOLON",NULL,NULL),createNode("ignore",$6,createNode("ignore",createNode("ROUND_BRACKET_CLOSE",NULL,NULL),$8)))))));
+                    }
+                    | FOR forstart ROUND_BRACKET_OPEN createST switch_table declaration countinst expression_opt SEMICOLON countinst expression_opt newstatement ROUND_BRACKET_CLOSE countinst CURLY_BRACKET_OPEN block_item_list_opt CURLY_BRACKET_CLOSE  
+                    {
+                        $$ = new Statement();
+                        itob($8);
+                        BackPath($8->TrueList,$14);
+                        BackPath($11->NextList,$7);
+                        BackPath($16->NextList,$10);
+                        QuadArray::Emit("goto",itos($10));
+                        $$->NextList = $8->FalseList;
+                        BlockType = "";
+                        CurrentST = CurrentST->PtrToParent;
                         //$$=createNode("iteration_statement",createNode("FOR",NULL,NULL),createNode("ignore",createNode("ROUND_BRACKET_OPEN",NULL,NULL),createNode("ignore",$3,createNode("ignore",$4,createNode("ignore",createNode("SEMICOLON",NULL,NULL),createNode("ignore",$6,createNode("ignore",createNode("ROUND_BRACKET_CLOSE",NULL,NULL),$8)))))));
                     }
                     ;
+
+forstart:
+        {
+            BlockType="FOR";
+        } 
+        ;
+
+whilestart:
+         {
+            BlockType="WHILE";
+        }
+        ;
+
+dostart:
+         {
+            BlockType="DO";
+        }
+        ;
 
 /*_______ JUMP STATEMENT ________*/
 
@@ -1718,14 +1871,18 @@ jump_statement : GOTO IDENTIFIER SEMICOLON
                 }
                 | CONTINUE SEMICOLON  
                 {
+                    $$ = new Statement();
                     //$$=createNode("jump_statement",createNode("CONTINUE",NULL,NULL),createNode("SEMICOLON",NULL,NULL));
                 }
                 | BREAK SEMICOLON 
                 {
+                    $$ = new Statement();
                     //$$=createNode("jump_statement",createNode("BREAK",NULL,NULL),createNode("SEMICOLON",NULL,NULL));
                 }
                | RETURN expression_opt SEMICOLON 
-               {
+                {
+                    $$ = new Statement();
+                    QuadArray::Emit("return",$2->Location->Name);
                 //$$=createNode("jump_statement",createNode("RETURN",NULL,NULL),createNode("ignore",$2,createNode("SEMICOLON",NULL,NULL)));
                 }
                ;
@@ -1747,7 +1904,7 @@ translation_unit : external_declaration
                     //$$=createNode("translation_unit",$1,NULL);
                 }
                  | translation_unit external_declaration 
-                 {
+                {
                     //$$=createNode("translation_unit",$1,$2);
                 }
                  ;
@@ -1766,18 +1923,21 @@ external_declaration : function_definition
 
 /*_______ FUNCTION DEFINITION ________*/
 
-function_definition : declaration_specifiers declarator declaration_list_opt compound_statement 
+function_definition : declaration_specifiers declarator declaration_list_opt CURLY_BRACKET_OPEN switch_table block_item_list_opt CURLY_BRACKET_CLOSE 
                     {
+                        CurrentST->PtrToParent = GlobalST;
+                        SymbolTableCount=0;
+                        CurrentST = GlobalST;
                         //$$=createNode("function_definition",createNode("ignore",$1,$2),createNode("ignore",$3,$4));
                     }
                     ;
 
 declaration_list_opt :  
-{
-    //$$ = createNode("declaration_list_opt",NULL,NULL);
-}
+                    {
+                        //$$ = createNode("declaration_list_opt",NULL,NULL);
+                    }
                      | declaration_list 
-                     {
+                    {
                         //$$=createNode("declaration_list_opt",$1,NULL);
                     }
                      ;
@@ -1785,11 +1945,11 @@ declaration_list_opt :
 /*_______ DECLARATION LIST ________*/
 
 declaration_list : declaration 
-{
-    //$$=createNode("declaration_list",$1,NULL);
-}
+                {
+                    //$$=createNode("declaration_list",$1,NULL);
+                }
                  | declaration_list declaration 
-                 {
+                {
                     //$$=createNode("declaration_list",$1,$2);
                 }
                  ;

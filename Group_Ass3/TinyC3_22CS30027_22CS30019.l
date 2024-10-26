@@ -106,8 +106,8 @@ WS							[ \t\v\n\f]
 {IDENTIFIER}				{Globe=yytext;return IDENTIFIER;}
 {INTEGER}	        		{yylval.INTVAL=atoi(yytext);return INTEGER;}
 {FLOATING_CONSTANT}	        {yylval.FLOATVAL=atof(yytext);return FLOATING_CONSTANT;}
-{CHARACTER_CONSTANT}        {return CHARACTER_CONSTANT;}
-{STRING_LITERAL}            {return STRING_LITERAL;}
+{CHARACTER_CONSTANT}        {yylval.CHARVAL=yytext;return CHARACTER_CONSTANT;}
+{STRING_LITERAL}            {yylval.CHARVAL=yytext;return STRING_LITERAL;}
 
 
 "["					{return SQUARE_BRACKET_OPEN;}

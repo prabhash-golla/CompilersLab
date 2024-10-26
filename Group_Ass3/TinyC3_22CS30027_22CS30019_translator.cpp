@@ -26,13 +26,15 @@ string BlockType;
 string VarType;
 
 SType::SType(string Type_,int Width_,SType* ArrType_):
-Type(Type),Width(Width_),ArrType(ArrType_) {}
+Type(Type_),Width(Width_),ArrType(ArrType_) {}
 
 Symbol::Symbol(string Name_,string Type_,int Width_,SType* ArrType):
 Name(Name_),offset(0),NestedTable(NULL),InitialValue("-")
 {
     Type = new SType(Type_,Width_,ArrType);
+    // cout << "Type : " << Type << "Type->Type: " << Type->Type << "\n";
     size = SizeOfS(Type);
+    // cout << "Prabahsh " << size << "\n";
 }
 
 Symbol* Symbol::Update(SType* Type_)
@@ -107,16 +109,17 @@ Symbol* SymbolTable::LookUp(string Name)
 void SymbolTable::Print()
 {
     cout << nl;
-    cout << "Symbol Table Name : " << this->Name << nl;
-    cout << "Parent : " << ((this->PtrToParent != NULL) ? this->PtrToParent->Name : "NULL") << nl;
-    cout << nl;
+    cout << "______________________________________________________________________________________________________________________________________________" <<nl<<nl;
+    cout << "Symbol Table Name : "  << setfill(' ') << left << setw(50) << this->Name;
+    cout << "Parent : " <<  setfill(' ') << left << setw(50) << ((this->PtrToParent != NULL) ? this->PtrToParent->Name : "NULL") << nl;
+    cout << "______________________________________________________________________________________________________________________________________________" <<nl<<nl;
     cout << setfill(' ') << left << setw(25) <<  "Name";
     cout << left << setw(25) << "Type";
     cout << left << setw(20) << "Initial Value";
     cout << left << setw(15) << "Size";
     cout << left << setw(15) << "Offset";
-    cout << left << "Nested" << nl;
-
+    cout << left << "Nested"<< nl;
+    cout << "______________________________________________________________________________________________________________________________________________" <<nl<<nl;
     list<SymbolTable*> Tab;
     for(auto it = this->Table.begin(); it != this->Table.end(); it++) 
     {
@@ -137,7 +140,7 @@ void SymbolTable::Print()
             cout << "NULL" << nl;
         }
     }
-    cout << nl;
+    cout << "______________________________________________________________________________________________________________________________________________" <<nl<<nl;
     for(auto it = Tab.begin(); it != Tab.end(); it++) 
     {
         (*it)->Print();
@@ -215,14 +218,23 @@ void Quad::Print()
 void QuadArray::Print()
 {
     cout << nl;
+    cout << "______________________________________________________________________________________________________________________________________________" << nl << nl;
     cout << "Three Adress Code : " << nl;
-    cout << nl;
+    cout << "______________________________________________________________________________________________________________________________________________" << nl <<nl;
     int Counter = 0;
 
     for(vector<Quad>::iterator it = this->InstructionList.begin();it!=this->InstructionList.end();it++,Counter++)
     {
-        cout << Counter << ":  ";
-        it->Print();
+        if(it->Op!="label")
+        {
+            cout << left << setw(4) << Counter << ":    ";
+            it->Print();
+        }
+        else
+        {
+            cout << nl <<left << setw(4) << Counter << ":";
+            it->Print();
+        }
         cout << nl;
     }
 }
@@ -361,6 +373,7 @@ int SizeOfS(SType* S)
     else if(S->Type == "func")
         return _FUNCSIZE;
     else
+        cout << "Unkown Type : " << S->Type << "\n";
         return -1;
 }
 
