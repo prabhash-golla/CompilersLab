@@ -89,21 +89,18 @@ constant : INTEGER
                 $$ = new Expression();
                 $$->Location = SymbolTable::GenTemp(new SType("int"),itos($1));
                 QuadArray::Emit("=",$$->Location->Name,$1);
-                //$$ = createNode("constant",createNode("INTEGER", NULL, NULL),NULL); 
             }
          | FLOATING_CONSTANT 
             { 
                 $$ = new Expression();
                 $$->Location = SymbolTable::GenTemp(new SType("float"),ftos($1));
                 QuadArray::Emit("=",$$->Location->Name,$1);
-                //$$ = createNode("constant",createNode("FLOATING_CONSTANT", NULL, NULL),NULL); 
             }
          | CHARACTER_CONSTANT 
             {
                 $$ = new Expression();
                 $$->Location = SymbolTable::GenTemp(new SType("char"),string($1));
                 QuadArray::Emit("=",$$->Location->Name,$1);
-                //$$ = createNode("constant",createNode("CHARACTER_CONSTANT", NULL, NULL),NULL); 
             }
          ;
 
@@ -113,25 +110,20 @@ primary_expression : IDENTIFIER
                         $$ = new Expression();
                         $$->Location = Temp;
                         $$->Type = "non_bool";
-                        //$$ = createNode("primary_expression",createNode("IDENTIFIER", NULL, NULL),NULL); 
                     }
                    | constant   
                     { 
                        $$ = $1;
-                        //$$ = createNode("primary_expression",$1,NULL); 
                     }
                    | STRING_LITERAL 
                     { 
                         $$ = new Expression();
                         $$->Location = SymbolTable::GenTemp(new SType("ptr"),string($1));
-                        // QuadArray::Emit("=",$$->LocalST->Name,$1);
                         $$->Location->Type->ArrType = new SType("char");
-                        //$$ = createNode("primary_expression",createNode("STRING_LITERAL", NULL, NULL),NULL); 
                     }
                    | ROUND_BRACKET_OPEN expression ROUND_BRACKET_CLOSE 
                     {   
                         $$ = $2;
-                        //$$ = createNode("primary_expression", createNode("ignore",createNode("ROUND_BRACKET_OPEN",NULL,NULL),$2), createNode("ROUND_BRACKET_CLOSE",NULL,NULL)); 
                     }
                    ;
 
@@ -143,7 +135,6 @@ postfix_expression : primary_expression
                         $$->Location = $1->Location;
                         $$->Array = $1->Location;
                         $$->Type = $1->Location->Type;
-                        //$$ = createNode("postfix_expression",$1,NULL); 
                     }
                    | postfix_expression SQUARE_BRACKET_OPEN expression SQUARE_BRACKET_CLOSE 
                     {
@@ -164,22 +155,20 @@ postfix_expression : primary_expression
                             int size = SizeOfS($$->Type);
                             QuadArray::Emit("*",$$->Location->Name,$3->Location->Name,itos(size));
                         }
-                        // $$ = createNode("postfix_expression",$1,createNode("ignore",createNode("SQUARE_BRACKET_OPEN",NULL,NULL),createNode("ignore",$3,createNode("SQUARE_BRACKET_CLOSE",NULL,NULL)))); 
                     }
                    | postfix_expression ROUND_BRACKET_OPEN argument_expression_list_opt ROUND_BRACKET_CLOSE 
                     { 
                         $$  = new ArrayType();
                         $$->Array = SymbolTable::GenTemp($1->Type);
                         QuadArray::Emit("call",$$->Array->Name,$1->Array->Name,itos($3));
-                        //$$ = createNode("postfix_expression", $1, createNode("ignore",createNode("ROUND_BRACKET_OPEN",NULL,NULL),createNode("ignore",$3,createNode("ROUND_BRACKET_OPEN",NULL,NULL)))); 
                     }
                    | postfix_expression DOT IDENTIFIER 
                     { 
-                        //$$ = createNode("postfix_expression", $1,createNode("ignore",createNode("DOT",NULL,NULL),createNode("IDENTIFIER", NULL, NULL))); 
+
                     }
                    | postfix_expression IMPLIES IDENTIFIER 
                     { 
-                        //$$ = createNode("postfix_expression", $1,createNode("ignore",createNode("IMPLIES",NULL,NULL),createNode("IDENTIFIER", NULL, NULL)));
+
                     }
                    | postfix_expression INCREMENT 
                     {
@@ -187,7 +176,6 @@ postfix_expression : primary_expression
                         $$->Array = SymbolTable::GenTemp($1->Array->Type);
                         QuadArray::Emit("=",$$->Array->Name,$1->Array->Name);
                         QuadArray::Emit("+",$1->Array->Name,$1->Array->Name,"1");
-                        // $$ = createNode("postfix_expression", $1, createNode("INCREMENT",NULL,NULL)); 
                     }
                    | postfix_expression DECREMENT 
                     { 
@@ -195,15 +183,14 @@ postfix_expression : primary_expression
                         $$->Array = SymbolTable::GenTemp($1->Array->Type);
                         QuadArray::Emit("=",$$->Array->Name,$1->Array->Name);
                         QuadArray::Emit("-",$1->Array->Name,$1->Array->Name,"1");
-                        //$$ = createNode("postfix_expression", $1, createNode("DECREMENT",NULL,NULL)); 
                     }
                    | ROUND_BRACKET_OPEN type_name ROUND_BRACKET_CLOSE CURLY_BRACKET_OPEN initializer_list CURLY_BRACKET_CLOSE 
                     {
-                        // $$ = createNode("postfix_expression", createNode("ignore",createNode("ignore",createNode("ROUND_BRACKET_OPEN",NULL,NULL),$2),createNode("ROUND_BRACKET_OPEN",NULL,NULL)),createNode("ignore",createNode("ignore",createNode("CURLY_BRACKET_CLOSE",NULL,NULL),$5),createNode("CURLY_BRACKET_CLOSE",NULL,NULL))); 
+
                     }
                    | ROUND_BRACKET_OPEN type_name ROUND_BRACKET_CLOSE CURLY_BRACKET_OPEN initializer_list COMMA CURLY_BRACKET_CLOSE 
                     {
-                        // $$ = createNode("postfix_expression", createNode("ignore",createNode("ignore",createNode("ROUND_BRACKET_OPEN",NULL,NULL),$2),createNode("ROUND_BRACKET_OPEN",NULL,NULL)),createNode("ignore",createNode("ignore",createNode("CURLY_BRACKET_CLOSE",NULL,NULL),$5),createNode("ignore",createNode("COMMA",NULL,NULL),createNode("CURLY_BRACKET_CLOSE",NULL,NULL)))); 
+
                     }
                    ;
 
@@ -212,12 +199,10 @@ postfix_expression : primary_expression
 argument_expression_list_opt: 
                         {
                             $$ = 0;
-                            //$$ = createNode("argument_expression_list_opt",NULL, NULL);
                         }
                         | argument_expression_list 
                         {
                             $$ = $1;
-                            //$$ = createNode("argument_expression_list_opt", $1, NULL);
                         }
                         ;
 
@@ -225,13 +210,11 @@ argument_expression_list : assignment_expression
                         { 
                             $$ = 1;
                             QuadArray::Emit("param",$1->Location->Name);
-                            //$$ = createNode("argument_expression_list", $1, NULL); 
                         }
                         | argument_expression_list COMMA assignment_expression 
                         { 
                             $$ = $1 + 1;
                             QuadArray::Emit("param",$3->Location->Name);
-                            //$$ = createNode("argument_expression_list", $1, createNode("ignore",createNode("COMMA",NULL,NULL),$3)); 
                         }
                         ;
 
@@ -240,19 +223,16 @@ argument_expression_list : assignment_expression
 unary_expression : postfix_expression 
                     {
                         $$ = $1;
-                        // $$ = createNode("unary_expression", $1, NULL); 
                     }
                  | INCREMENT unary_expression 
                     { 
                         QuadArray::Emit("+",$2->Array->Name,$2->Array->Name,"1");
                         $$ = $2;
-                        //$$ = createNode("unary_expression", createNode("INCREMENT",NULL,NULL), $2); 
                     }
                  | DECREMENT unary_expression 
                     { 
                         QuadArray::Emit("-",$2->Array->Name,$2->Array->Name,"1");
                         $$ = $2;
-                        //$$ = createNode("unary_expression", createNode("DECREMENT",NULL,NULL), $2); 
                     }
                  | unary_operator cast_expression 
                     { 
@@ -288,15 +268,14 @@ unary_expression : postfix_expression
 
                         }
                         
-                        //$$ = createNode("unary_expression", $1, $2); 
                     }
                  | SIZEOF unary_expression 
                     { 
-                        //$$ = createNode("unary_expression", createNode("SIZEOF",NULL,NULL), $2); 
+
                     }
                  | SIZEOF ROUND_BRACKET_OPEN type_name ROUND_BRACKET_CLOSE 
                     {  
-                        //$$ = createNode("unary_expression", createNode("SIZEOF",NULL,NULL), createNode("ignore",createNode("ignore",createNode("ROUND_BRACKET_OPEN",NULL,NULL),$3),createNode("ROUND_BRACKET_CLOSE",NULL,NULL))); 
+
                     }
                  ;
 
@@ -305,32 +284,26 @@ unary_expression : postfix_expression
 unary_operator: BITWISE_AND 
                 {
                     $$ = '&';
-                    // $$ = createNode("BITWISE_AND", NULL, NULL); 
                 }
               | MUL 
                 { 
                     $$ = '*';
-                    //$$ = createNode("MUL", NULL, NULL); 
                 }
               | PLUS 
                 { 
                     $$ = '+';
-                    //$$ = createNode('PLUS', NULL, NULL); 
                 }
               | MINUS 
                 { 
                     $$ = '-';
-                    //$$ = createNode('MINUS', NULL, NULL); 
                 }
               | BITWISE_NOT 
                 { 
                     $$ = '~';
-                    //$$ = createNode('BITWISE_NOT', NULL, NULL); 
                 }
               | NOT 
                 {
                     $$ = '!';
-                    // $$ = createNode('NOT', NULL, NULL); 
                 }
               ;
 
@@ -339,13 +312,11 @@ unary_operator: BITWISE_AND
 cast_expression : unary_expression 
                 { 
                     $$ = $1;
-                    //$$ =  createNode("cast_expression", $1, NULL); 
                 }
                 | ROUND_BRACKET_OPEN type_name ROUND_BRACKET_CLOSE cast_expression 
                 { 
                     $$ = new ArrayType();
                     $$->Array = TypeConvertor($4->Array,VarType);
-                    //$$ =  createNode("cast_expression", createNode("ROUND_BRACKET_OPEN",NULL,NULL), createNode("ignore",$2,createNode("ignore",createNode("ROUND_BRACKET_CLOSE",NULL,NULL),$4))); 
                 }
                 ;
 
@@ -367,7 +338,6 @@ multiplicative_expression : cast_expression
                                 {
                                     $$->Location = $1->Array;
                                 }
-                                //$$ =createNode("multiplicative_expression",$1,NULL);  
                             }
                          | multiplicative_expression MUL cast_expression 
                             { 
@@ -381,7 +351,6 @@ multiplicative_expression : cast_expression
                                 {
                                     yyerror("Type Mismatch");
                                 }
-                                //$$ = createNode("multiplicative_expression",$1,createNode("ignore",createNode("MUL", NULL, NULL),$3)); 
                             }
                          | multiplicative_expression DIV cast_expression 
                             { 
@@ -395,7 +364,6 @@ multiplicative_expression : cast_expression
                                 {
                                     yyerror("Type Mismatch");
                                 }
-                                //$$ = createNode("multiplicative_expression",$1,createNode("ignore",createNode("DIV", NULL, NULL),$3)); 
                             }
                          | multiplicative_expression MOD cast_expression 
                             { 
@@ -409,7 +377,6 @@ multiplicative_expression : cast_expression
                                 {
                                     yyerror("Type Mismatch");
                                 }
-                                //$$ = createNode("multiplicative_expression",$1,createNode("ignore",createNode("MOD", NULL, NULL),$3)); 
                             }
                          ;
 
@@ -418,7 +385,6 @@ multiplicative_expression : cast_expression
 additive_expression : multiplicative_expression 
                     { 
                         $$ = $1;
-                        //$$ =createNode("additive_expression",$1,NULL); 
                     }
                    | additive_expression PLUS multiplicative_expression 
                     {
@@ -432,7 +398,6 @@ additive_expression : multiplicative_expression
                         {
                             yyerror("Type Mismatch");
                         }
-                        //$$ = createNode("additive_expression",$1,createNode("ignore",createNode("PLUS", NULL, NULL),$3)); 
                     }
                    | additive_expression MINUS multiplicative_expression 
                     { 
@@ -446,7 +411,6 @@ additive_expression : multiplicative_expression
                         {
                             yyerror("Type Mismatch");
                         }
-                        //$$ = createNode("additive_expression",$1,createNode("ignore",createNode("MINUS", NULL, NULL),$3)); 
                     }
                    ;
 
@@ -455,7 +419,6 @@ additive_expression : multiplicative_expression
 shift_expression : additive_expression
                  { 
                     $$ = $1;
-                    //$$ =createNode("shift_expression",$1,NULL); 
                 }
                  | shift_expression LEFT_SHIFT additive_expression 
                  { 
@@ -469,7 +432,6 @@ shift_expression : additive_expression
                     {
                         yyerror("Type Error");
                     }
-                    //$$ = createNode("shift_expression",$1,createNode("ignore",createNode("LEFT_SHIFT", NULL, NULL),$3)); 
                 }
                  | shift_expression RIGHT_SHIFT additive_expression 
                  {
@@ -483,7 +445,6 @@ shift_expression : additive_expression
                     {
                         yyerror("Type Error");
                     }
-                    // $$ = createNode("shift_expression",$1,createNode("ignore",createNode("RIGHT_SHIFT", NULL, NULL),$3)); 
                 }
                  ;
 
@@ -492,7 +453,6 @@ shift_expression : additive_expression
 relational_expression : shift_expression 
                     {
                         $$=$1;
-                        // $$ =createNode("relational_expression",$1,NULL); 
                     }
                      | relational_expression LESS_THAN shift_expression 
                     {
@@ -509,7 +469,6 @@ relational_expression : shift_expression
                         {
                             yyerror("Type mismatch");
                         }
-                        //$$ = createNode("relational_expression",$1,createNode("ignore",createNode("LESS_THAN", NULL, NULL),$3)); 
                     }
                      | relational_expression GREATER_THAN shift_expression 
                      { 
@@ -526,7 +485,6 @@ relational_expression : shift_expression
                         {
                             yyerror("Type mismatch");
                         }
-                        //$$ = createNode("relational_expression",$1,createNode("ignore",createNode("GREATER_THAN", NULL, NULL),$3)); 
                     }
                      | relational_expression LESS_EQUAL shift_expression 
                      { 
@@ -543,7 +501,6 @@ relational_expression : shift_expression
                         {
                             yyerror("Type mismatch");
                         }
-                        //$$ = createNode("relational_expression",$1,createNode("ignore",createNode("LESS_EQUAL", NULL, NULL),$3)); 
                     }
                      | relational_expression GREATER_EQUAL shift_expression 
                      { 
@@ -560,7 +517,6 @@ relational_expression : shift_expression
                         {
                             yyerror("Type mismatch");
                         }
-                        //$$ = createNode("relational_expression",$1,createNode("ignore",createNode("GREATER_EQUAL", NULL, NULL),$3)); 
                     }
                      ;
 
@@ -569,7 +525,6 @@ relational_expression : shift_expression
 equality_expression : relational_expression 
                     { 
                         $$ = $1;
-                        //$$ = createNode("equality_expression",$1,NULL); 
                     }
                    | equality_expression EQUAL relational_expression 
                    { 
@@ -588,7 +543,6 @@ equality_expression : relational_expression
                         {
                             yyerror("Type mismatch");
                         }
-                       //$$ = createNode("equality_expression",$1,createNode("ignore",createNode("EQUAL", NULL, NULL),$3)); 
                     }
                    | equality_expression NOT_EQUAL relational_expression 
                    {
@@ -607,7 +561,6 @@ equality_expression : relational_expression
                         {
                             yyerror("Type mismatch");
                         }
-                     //$$ = createNode("equality_expression",$1,createNode("ignore",createNode("NOT_EQUAL", NULL, NULL),$3));
                      }
                    ;
 
@@ -616,7 +569,6 @@ equality_expression : relational_expression
 and_expression : equality_expression 
                 { 
                     $$ = $1;
-                    //$$ = createNode("and_expression",$1,NULL); 
                 }
                | and_expression BITWISE_AND equality_expression
                 { 
@@ -633,7 +585,6 @@ and_expression : equality_expression
                     {
                         yyerror("Type mismatch");
                     }
-                    //$$ = createNode("and_expression",$1,createNode("ignore",createNode("BITWISE_AND", NULL, NULL),$3)); 
                 }
                ;
 
@@ -642,7 +593,6 @@ and_expression : equality_expression
 exclusive_or_expression : and_expression 
                         { 
                             $$ = $1;
-                            //$$ = createNode("exclusive_or_expression",$1,NULL); 
                         }
                         | exclusive_or_expression BITWISE_XOR and_expression 
                         {
@@ -659,7 +609,6 @@ exclusive_or_expression : and_expression
                             {
                                 yyerror("Type mismatch");
                             }
-                            //$$ = createNode("exclusive_or_expression",$1,createNode("ignore",createNode("BITWISE_XOR", NULL, NULL),$3)); 
                         }
                         ;
 
@@ -668,7 +617,6 @@ exclusive_or_expression : and_expression
 inclusive_or_expression : exclusive_or_expression 
                         { 
                             $$ = $1;
-                            //$$ = createNode("inclusive_or_expression",$1,NULL); 
                         }
                         | inclusive_or_expression BITWISE_OR exclusive_or_expression 
                         { 
@@ -685,7 +633,6 @@ inclusive_or_expression : exclusive_or_expression
                             {
                                 yyerror("Type mismatch");
                             }
-                            //$$ = createNode("inclusive_or_expression",$1,createNode("ignore",createNode("BITWISE_OR", NULL, NULL),$3)); 
                         }
                         ;
 
@@ -694,7 +641,6 @@ inclusive_or_expression : exclusive_or_expression
 logical_and_expression : inclusive_or_expression 
                         { 
                             $$ = $1;
-                            //$$ = createNode("logical_and_expression",$1,NULL); 
                         }
                        | logical_and_expression AND inclusive_or_expression 
                         { 
@@ -705,7 +651,6 @@ logical_and_expression : inclusive_or_expression
                             BackPatch($1->TrueList,QuadList.InstructionList.size());
                             $$->TrueList = $3->TrueList;
                             $$->FalseList = Merge($1->FalseList,$3->FalseList);
-                            //$$ = createNode("logical_and_expression",$1,createNode("ignore",createNode("AND", NULL, NULL),$3)); 
                         }
                        ;
 
@@ -714,7 +659,6 @@ logical_and_expression : inclusive_or_expression
 logical_or_expression : logical_and_expression 
                         { 
                             $$ = $1;
-                            //$$ = createNode("logical_or_expression",$1,NULL); 
                         }
                       | logical_or_expression OR logical_and_expression 
                         {
@@ -725,7 +669,6 @@ logical_or_expression : logical_and_expression
                             BackPatch($1->FalseList,QuadList.InstructionList.size());
                             $$->FalseList = $3->FalseList;
                             $$->TrueList = Merge($1->TrueList,$3->TrueList);
-                            // $$ = createNode("logical_or_expression",$1,createNode("ignore",createNode("OR", NULL, NULL),$3));  
                         }
                       ;
 
@@ -734,9 +677,9 @@ logical_or_expression : logical_and_expression
 conditional_expression : logical_or_expression 
                         {
                             $$ = $1;
-                            // $$ = createNode("conditional_expression",$1,NULL); 
                         }
                       | logical_or_expression newstatement QUESTION countinst expression newstatement COLON countinst conditional_expression 
+                        /*newstatement,countinst are added for augmentation*/
                         { 
                             $$ = new Expression();
                             $$->Location = SymbolTable::GenTemp($5->Location->Type);
@@ -754,16 +697,15 @@ conditional_expression : logical_or_expression
                             BackPatch($1->TrueList,$4);
                             BackPatch($1->FalseList,$8);
                             BackPatch(ll,QuadList.InstructionList.size());
-                            //$$ = createNode("conditional_expression",$1,createNode("ignore",createNode("QUESTION", NULL, NULL),createNode("ignore",$3,createNode("ignore",createNode("COLON", NULL, NULL),$5))));
                         }
                       ;
-
+/*returns the no of quads are there in the quad array */
 countinst: 
             {
                 $$ = QuadList.InstructionList.size();
             }
             ;
-
+/*add a goto line to TAC,with empty label */
 newstatement:
             {
                 $$ = new Statement();
@@ -776,7 +718,7 @@ newstatement:
 assignment_expression : conditional_expression 
                     {
                         $$ = $1;
-                        // $$ = createNode("assignment_expression",$1,NULL); 
+
                     }
                      | unary_expression ASSIGN assignment_expression 
                     { 
@@ -795,7 +737,7 @@ assignment_expression : conditional_expression
                             QuadArray::Emit("=",$1->Array->Name,$3->Location->Name);
                         }
                         $$ = $3;
-                        //$$ = createNode("assignment_expression",$1,createNode("ignore",createNode("ASSIGN", NULL, NULL),$3)); 
+
                     }
                      | unary_expression MUL_EQUAL assignment_expression 
                     { 
@@ -814,7 +756,7 @@ assignment_expression : conditional_expression
                             QuadArray::Emit("=",$1->Array->Name,$3->Location->Name);
                         }
                         $$ = $3;
-                        //$$ = createNode("assignment_expression",$1,createNode("ignore",createNode("MUL_EQUAL", NULL, NULL),$3)); 
+
                     }
                      | unary_expression DIV_EQUAL assignment_expression 
                     {
@@ -833,7 +775,7 @@ assignment_expression : conditional_expression
                             QuadArray::Emit("=",$1->Array->Name,$3->Location->Name);
                         }
                         $$ = $3;
-                        //$$ = createNode("assignment_expression",$1,createNode("ignore",createNode("DIV_EQUAL", NULL, NULL),$3)); 
+
                     }
                      | unary_expression MOD_EQUAL assignment_expression 
                     { 
@@ -852,7 +794,7 @@ assignment_expression : conditional_expression
                             QuadArray::Emit("=",$1->Array->Name,$3->Location->Name);
                         }
                         $$ = $3;
-                        //$$ = createNode("assignment_expression",$1,createNode("ignore",createNode("MOD_EQUAL", NULL, NULL),$3)); 
+
                     }
                      | unary_expression PLUS_EQUAL assignment_expression 
                     {
@@ -871,7 +813,7 @@ assignment_expression : conditional_expression
                             QuadArray::Emit("=",$1->Array->Name,$3->Location->Name);
                         }
                         $$ = $3;
-                        //$$ = createNode("assignment_expression",$1,createNode("ignore",createNode("PLUS_EQUAL", NULL, NULL),$3)); 
+
                     }
                      | unary_expression MINUS_EQUAL assignment_expression
                     {
@@ -890,7 +832,7 @@ assignment_expression : conditional_expression
                             QuadArray::Emit("=",$1->Array->Name,$3->Location->Name);
                         }
                         $$ = $3;
-                        //$$ = createNode("assignment_expression",$1,createNode("ignore",createNode("MINUS_EQUAL", NULL, NULL),$3)); 
+
                     }                
                      | unary_expression SHIFT_LEFT_EQUAL assignment_expression
                     {
@@ -909,7 +851,7 @@ assignment_expression : conditional_expression
                             QuadArray::Emit("=",$1->Array->Name,$3->Location->Name);
                         }
                         $$ = $3;
-                        //$$ = createNode("assignment_expression",$1,createNode("ignore",createNode("SHIFT_LEFT_EQUAL", NULL, NULL),$3)); 
+
                     }                     
                     | unary_expression SHIFT_RIGHT_EQUAL assignment_expression
                     {
@@ -928,7 +870,7 @@ assignment_expression : conditional_expression
                             QuadArray::Emit("=",$1->Array->Name,$3->Location->Name);
                         }
                         $$ = $3;
-                        //$$ = createNode("assignment_expression",$1,createNode("ignore",createNode("PLUS_EQUAL", NULL, NULL),$3)); 
+
                     }
 
                      | unary_expression BITWISE_AND_EQUAL assignment_expression
@@ -948,7 +890,7 @@ assignment_expression : conditional_expression
                             QuadArray::Emit("=",$1->Array->Name,$3->Location->Name);
                         }
                         $$ = $3;
-                        //$$ = createNode("assignment_expression",$1,createNode("ignore",createNode("BITWISE_AND_EQUAL", NULL, NULL),$3)); 
+
                     }
 
                      | unary_expression BITWISE_XOR_EQUAL assignment_expression
@@ -968,7 +910,7 @@ assignment_expression : conditional_expression
                             QuadArray::Emit("=",$1->Array->Name,$3->Location->Name);
                         }
                         $$ = $3;
-                        //$$ = createNode("assignment_expression",$1,createNode("ignore",createNode("BITWISE_XOR_EQUAL", NULL, NULL),$3)); 
+
                     }
 
                      | unary_expression BITWISE_OR_EQUAL assignment_expression
@@ -988,7 +930,7 @@ assignment_expression : conditional_expression
                             QuadArray::Emit("=",$1->Array->Name,$3->Location->Name);
                         }
                         $$ = $3;
-                        //$$ = createNode("assignment_expression",$1,createNode("ignore",createNode("BITWISE_OR_EQUAL", NULL, NULL),$3)); 
+
                     }                   
                     ;
 
@@ -998,18 +940,18 @@ assignment_expression : conditional_expression
 expression : assignment_expression 
             {
                 $$ = $1;
-                //$$ = createNode("expression",$1,NULL); 
+
             }
            | expression COMMA assignment_expression 
             { 
-                //$$ = createNode("expression",$1,createNode("ignore",createNode("COMMA", NULL, NULL),$3)); 
+
             }
            ;
 /*_______ CONSTANT EXPRESSION ________*/
 
 constant_expression : conditional_expression 
                     {
-                        // $$ = createNode("constant_expression", $1, NULL); 
+
                     }
                     ;
 
@@ -1021,7 +963,7 @@ constant_expression : conditional_expression
 
 declaration : declaration_specifiers init_declarator_list_opt SEMICOLON 
             { 
-                //$$ = createNode("declaration", $1, createNode("ignore",$2,createNode("SEMICOLON",NULL,NULL))); 
+
             }
             ;
 
@@ -1029,35 +971,35 @@ declaration : declaration_specifiers init_declarator_list_opt SEMICOLON
 
 declaration_specifiers : storage_class_specifier 
                         {
-                            //$$ = createNode("declaration_specifier", $1, NULL);
+
                         }
                         | type_specifier 
                         {
-                            //$$ = createNode("declaration_specifier", $1, NULL);
+
                         }       
                         | type_qualifier 
                         {
-                            //$$ = createNode("declaration_specifier", $1, NULL);
+
                         }
                         | function_specifier 
                         {
-                            //$$ = createNode("declaration_specifier", $1, NULL);
+
                         }
                         | storage_class_specifier declaration_specifiers 
                         {
-                            //$$ = createNode("declaration_specifiers", $1, $2);
+
                         }
                         | type_specifier declaration_specifiers 
                         {
-                            //$$ = createNode("declaration_specifiers", $1, $2);
+
                         }
                         | type_qualifier declaration_specifiers 
                         {
-                            //$$ = createNode("declaration_specifiers", $1, $2);
+
                         }
                         | function_specifier declaration_specifiers 
                         {
-                            //$$ = createNode("declaration_specifiers", $1, $2);
+
                         }
                         ;
 
@@ -1065,21 +1007,21 @@ declaration_specifiers : storage_class_specifier
 
 init_declarator_list_opt:  
                         {
-                            //$$ = createNode("init_declarator_list_opt",NULL, NULL);
+
                         }
                         |  init_declarator_list 
                         {
-                            //$$ = createNode("init_declarator_list_opt", $1, NULL);
+
                         }
                         ;
 
 init_declarator_list : init_declarator 
                         {
-                            //$$ = createNode("init_declerator_list", $1, NULL);
+
                         }
                         | init_declarator_list COMMA init_declarator 
                         {
-                            //$$ = createNode("init_declerator_list", $1, createNode("ignore",createNode("COMMA",NULL,NULL),$3));
+
                         }
                         ;
 
@@ -1088,7 +1030,7 @@ init_declarator_list : init_declarator
 init_declarator : declarator 
                 {
                     $$ = $1;
-                    //$$ = createNode("init_declerator", $1,NULL);
+
                 }
                 | declarator ASSIGN initializer 
                 {
@@ -1097,7 +1039,7 @@ init_declarator : declarator
                         $1->InitialValue = $3->InitialValue;
                     }
                     QuadArray::Emit("=",$1->Name,$3->Name);
-                    //$$ = createNode("init_declerator", $1, createNode("ignore",createNode("ASSIGN",NULL,NULL),$3));
+
                 }
                 ;
 
@@ -1105,19 +1047,19 @@ init_declarator : declarator
 
 storage_class_specifier : EXTERN 
                         {
-                            //$$ = createNode("storage_class_specifier", createNode("EXTERN",NULL,NULL), NULL);
+                            
                         } 
                         | AUTO 
                         {
-                            //$$ = createNode("storage_class_specifier", createNode("AUTO",NULL,NULL), NULL);
+                            
                         } 
                         | REGISTER 
                         {
-                            //$$ = createNode("storage_class_specifier", createNode("REGISTER",NULL,NULL), NULL);
+                            
                         } 
                         | STATIC 
                         {
-                            //$$ = createNode("storage_class_specifier",createNode("STATIC",NULL,NULL), NULL);
+                            
                         }
                         ;
 
@@ -1126,62 +1068,62 @@ storage_class_specifier : EXTERN
 type_specifier : VOID 
                 {
                     VarType="void";
-                    // $$ = createNode("type_specifier", createNode("VOID",NULL,NULL), NULL); 
+
                 }
                 | CHAR 
                 {
                     VarType="char";
-                    // $$ = createNode("type_specifier", createNode("CHARACTER",NULL,NULL), NULL); 
+
                 }
                 | SHORT 
                 {
                     VarType="short";
-                    // $$ = createNode("type_specifier", createNode("SHORT",NULL,NULL), NULL); 
+
                 }
                 | INT 
                 {
                     VarType="int";
-                    // $$ = createNode("type_specifier", createNode("INTEGER",NULL,NULL), NULL); 
+
                 }
                 | LONG 
                 {
                     VarType="long";
-                    // $$ = createNode("type_specifier", createNode("LONG",NULL,NULL), NULL); 
+
                 }
                 | FLOAT 
                 {
                     VarType="float";
-                    // $$ = createNode("type_specifier", createNode("FLOAT",NULL,NULL), NULL); 
+
                 }
                 | SIGNED 
                 {
                     VarType="signed";
-                    // $$ = createNode("type_specifier", createNode("SIGNED",NULL,NULL), NULL); 
+
                 }
                 | UNSIGNED 
                 {
                     VarType="unsigned";
-                    // $$ = createNode("type_specifier", createNode("UNSIGNED",NULL,NULL), NULL); 
+
                 }
                 | BOOL 
                 {
                     VarType="bool";
-                    // $$ = createNode("type_specifier", createNode("_BOOL",NULL,NULL), NULL); 
+
                 }
                 | COMPLEX 
                 {
                     VarType="complex";
-                    // $$ = createNode("type_specifier", createNode("_COMPLEX",NULL,NULL), NULL); 
+
                 }
                 | IMAGINARY 
                 {
                     VarType="imaginary";
-                    // $$ = createNode("type_specifier", createNode("_IMAGINARY",NULL,NULL), NULL); 
+
                 }
                 | DOUBLE 
                 {
                     VarType="double";
-                    // $$ = createNode("type_specifier", createNode("DOUBLE",NULL,NULL), NULL); 
+
                 }
                 ;
 
@@ -1189,19 +1131,19 @@ type_specifier : VOID
 
 specifier_qualifier_list : type_specifier specifier_qualifier_list 
                         {
-                            //$$ = createNode("specifier_qualifier_list", $1, $2);
+
                         }
                         | type_qualifier specifier_qualifier_list  
                         {
-                            //$$ = createNode("specifier_qualifier_list", $1, $2);
+
                         }
                         | type_specifier 
                         {
-                            //$$ = createNode("specifier_qualifier_list", $1, NULL);
+
                         }
                         | type_qualifier 
                         {
-                            //$$ = createNode("specifier_qualifier_list", $1, NULL);
+
                         }
                         ;
 
@@ -1209,15 +1151,15 @@ specifier_qualifier_list : type_specifier specifier_qualifier_list
 
 type_qualifier : CONST 
                 {
-                    //$$ = createNode("type_qualifier", createNode("CONST",NULL,NULL), NULL);
+
                 }
                 | RESTRICT 
                 {
-                    //$$ = createNode("type_qualifier", createNode("RESTRICT",NULL,NULL), NULL);
+
                 }
                 | VOLATILE 
                 {
-                    //$$ = createNode("type_qualifier", createNode("VOLATILE",NULL,NULL), NULL);
+
                 }
                 ;
 
@@ -1225,7 +1167,7 @@ type_qualifier : CONST
 
 function_specifier : INLINE 
                     {
-                        //$$ = createNode("function_specifier", createNode("INLINE",NULL,NULL), NULL);
+
                     }
                     ;
 
@@ -1240,7 +1182,7 @@ declarator : pointer direct_declarator
                 } 
                 S->ArrType = $2->Type;
                 $$ = $2->Update($1);
-                //$$ = createNode("declarator", $1, $2);
+
             }
             | direct_declarator
             {
@@ -1257,16 +1199,16 @@ direct_declarator : IDENTIFIER
                         $$ = &(CurrentST->Table.back());
                         $$->Update(new SType(VarType));
                         RecentSymbol = $$;
-                        //$$ = createNode("direct_declarator", createNode("IDENTIFIER",NULL,NULL), NULL);
+
                     }
                     | ROUND_BRACKET_OPEN declarator ROUND_BRACKET_CLOSE 
                     {
                         $$ = $2;
-                        //$$ = createNode("direct_declarator",createNode("ignore",createNode("ROUND_BRACKET_OPEN",NULL,NULL),$2), createNode("ROUND_BRACKET_CLOSE",NULL,NULL));
+
                     }
                     | direct_declarator SQUARE_BRACKET_OPEN  type_qualifier_list assignment_expression_opt SQUARE_BRACKET_CLOSE 
                     {
-                        //$$ = createNode("direct_declarator", createNode("ignore",$1,createNode("SQUARE_BRACKET_OPEN",NULL,NULL)), createNode("ignore",$3,createNode("ignore",$4,createNode("SQUARE_BRACKET_CLOSE",NULL,NULL))));
+
                     }
                     | direct_declarator SQUARE_BRACKET_OPEN assignment_expression SQUARE_BRACKET_CLOSE 
                     {
@@ -1293,7 +1235,7 @@ direct_declarator : IDENTIFIER
                             Prev->ArrType = Temp2;
                             $$ = $1->Update($1->Type);
                         }
-                        //$$ = createNode("direct_declarator", createNode("ignore",$1,createNode("SQUARE_BRACKET_OPEN",NULL,NULL)), createNode("ignore",$3,createNode("ignore",$4,createNode("SQUARE_BRACKET_CLOSE",NULL,NULL))));
+
                     }
                     | direct_declarator SQUARE_BRACKET_OPEN SQUARE_BRACKET_CLOSE 
                     {
@@ -1318,17 +1260,18 @@ direct_declarator : IDENTIFIER
                     }
                     | direct_declarator SQUARE_BRACKET_OPEN STATIC type_qualifier_list_opt assignment_expression SQUARE_BRACKET_CLOSE 
                     {
-                        //$$ = createNode("direct_declarator", createNode("ignore",$1,createNode("SQUARE_BRACKET_OPEN",NULL,NULL)), createNode("ignore",createNode("ignore",createNode("STATIC",NULL,NULL),$4),createNode("ignore",$5,createNode("SQUARE_BRACKET_CLOSE",NULL,NULL))));
+
                     }
                     | direct_declarator SQUARE_BRACKET_OPEN type_qualifier_list STATIC assignment_expression SQUARE_BRACKET_CLOSE 
                     {
-                        //$$ = createNode("direct_declarator", createNode("ignore",$1,createNode("SQUARE_BRACKET_OPEN",NULL,NULL)), createNode("ignore",createNode("ignore",$3,createNode("STATIC",NULL,NULL)),createNode("ignore",$5,createNode("SQUARE_BRACKET_CLOSE",NULL,NULL))));
+
                     }
                     | direct_declarator SQUARE_BRACKET_OPEN type_qualifier_list MUL SQUARE_BRACKET_CLOSE 
                     {
-                        //$$ = createNode("direct_declarator", createNode("ignore",$1,createNode("SQUARE_BRACKET_OPEN",NULL,NULL)), createNode("ignore",createNode("ignore",$3,createNode("MUL",NULL,NULL)),createNode("SQUARE_BRACKET_CLOSE",NULL,NULL)));
+
                     }
                     | direct_declarator ROUND_BRACKET_OPEN switch_table parameter_type_list ROUND_BRACKET_CLOSE 
+                    /*switch_table added for augmentation */
                     {
                         CurrentST->Name = $1->Name;
                         if($1->Type->Type!="void")
@@ -1340,7 +1283,6 @@ direct_declarator : IDENTIFIER
                         CurrentST->PtrToParent = GlobalST;
                         CurrentST = GlobalST;
                         RecentSymbol = $$;
-                        //$$ = createNode("direct_declarator", createNode("ignore",$1,createNode("ROUND_BRACKET_OPEN",NULL,NULL)), createNode("ignore",$3,createNode("ROUND_BRACKET_CLOSE",NULL,NULL)));
                     }
                     | direct_declarator ROUND_BRACKET_OPEN switch_table ROUND_BRACKET_CLOSE 
                     {
@@ -1354,14 +1296,13 @@ direct_declarator : IDENTIFIER
                         CurrentST->PtrToParent = GlobalST;
                         CurrentST = GlobalST;
                         RecentSymbol = $$;
-                        //$$ = createNode("direct_declarator", createNode("ignore",$1,createNode("ROUND_BRACKET_OPEN",NULL,NULL)), createNode("ignore",$3,createNode("ROUND_BRACKET_CLOSE",NULL,NULL)));
                     }
                     | direct_declarator ROUND_BRACKET_OPEN identifier_list ROUND_BRACKET_CLOSE 
                     {
-                        //$$ = createNode("direct_declarator", createNode("ignore",$1,createNode("ROUND_BRACKET_OPEN",NULL,NULL)), createNode("ignore",$3,createNode("ROUND_BRACKET_CLOSE",NULL,NULL)));
+
                     }
                     ;
-
+/*switch_tabel used to change the curent symboltable pointer to new symboltable or another already existing symbol table*/
 switch_table:
             {
                 if(RecentSymbol->NestedTable!=NULL)
@@ -1377,20 +1318,20 @@ switch_table:
             ;
 
 type_qualifier_list_opt : {
-                            //$$ = createNode("type_qualifier_list_opt",NULL,NULL);
+
                         }  
                         | type_qualifier_list 
                         {
-                            //$$ = createNode("type_qualifier_list_opt",$1,NULL);
+
                         }
                         ;
 
 assignment_expression_opt :  {
-                            //$$ = createNode("assignment_expression_opt",NULL,NULL);
+
                             }
                           | assignment_expression 
                             {
-                                //$$ = createNode("assignment_expression_opt",$1,NULL);
+
                             }
                             ;
 
@@ -1399,12 +1340,12 @@ assignment_expression_opt :  {
 pointer : MUL type_qualifier_list_opt 
         {
             $$ = new SType("ptr");
-            //$$=createNode("pointer",createNode("MUL",NULL,NULL), $2);
+
         }
         | MUL type_qualifier_list_opt pointer 
         {
             $$ = new SType("ptr",1,$3);
-            //$$=createNode("pointer",createNode("MUL",NULL,NULL) ,createNode("ignore",$2, $3));
+
         }
         ;
 
@@ -1412,11 +1353,11 @@ pointer : MUL type_qualifier_list_opt
 
 type_qualifier_list : type_qualifier 
                     {
-                        //$$=createNode("type_qualifier_list",$1,NULL);
+
                     }
                     | type_qualifier_list type_qualifier 
                     {
-                        //$$=createNode("type_qualifier_list", $1, $2);
+
                     }
                     ;
 
@@ -1424,10 +1365,10 @@ type_qualifier_list : type_qualifier
 
 parameter_type_list : parameter_list 
                     {
-                        //$$=createNode("parameter_type_list",$1,NULL);
+
                     }
                     | parameter_list COMMA ELLIPSIS {
-                        //$$=createNode("parameter_type_list", $1, createNode("ignore",createNode("COMMA",NULL,NULL),createNode("ELLIPSIS",NULL,NULL)));
+
                     }
                     ;
 
@@ -1435,11 +1376,11 @@ parameter_type_list : parameter_list
 
 parameter_list : parameter_declaration 
                 {
-                    //$$=createNode("parameter_list",$1,NULL);
+
                 }
                | parameter_list COMMA parameter_declaration 
                {
-                //$$=createNode("parameter_list", createNode("ignore",$1,createNode("COMMA",NULL,NULL)), $3);
+
                 }
                ;
 
@@ -1447,11 +1388,11 @@ parameter_list : parameter_declaration
 
 parameter_declaration : declaration_specifiers declarator 
                     {
-                        //$$=createNode("parameter_declaration", $1, $2);
+
                     }
                       | declaration_specifiers 
                     {
-                        //$$=createNode("parameter_declaration",$1,NULL);
+
                     }
                       ;
 
@@ -1459,11 +1400,11 @@ parameter_declaration : declaration_specifiers declarator
 
 identifier_list: IDENTIFIER 
                 {
-                    //$$=createNode("identifier_list",createNode("IDENTIFIER",NULL,NULL),NULL);
+
                 }
                | identifier_list COMMA IDENTIFIER 
                {
-                //$$=createNode("identifier_list", $1, createNode("ignore",createNode("COMMA",NULL,NULL),createNode("IDENTIFIER",NULL,NULL)));
+
                 }
                ;
 
@@ -1471,7 +1412,7 @@ identifier_list: IDENTIFIER
 
 type_name : specifier_qualifier_list 
             {
-                //$$=createNode("type_name",$1,NULL);
+
             }
             ;
 
@@ -1480,15 +1421,15 @@ type_name : specifier_qualifier_list
 initializer : assignment_expression 
             {
                 $$ = $1->Location;
-                //$$=createNode("initializer",$1,NULL);
+
             }
             | CURLY_BRACKET_OPEN initializer_list CURLY_BRACKET_CLOSE 
             {
-                //$$=createNode("initializer",createNode("ignore",createNode("CURLY_BRACKET_OPEN",NULL,NULL),$2),createNode("CURLY_BRACKET_CLOSE",NULL,NULL));
+
             }
             | CURLY_BRACKET_OPEN initializer_list COMMA CURLY_BRACKET_CLOSE 
             {
-                //$$=createNode("initializer",createNode("ignore",createNode("CURLY_BRACKET_OPEN",NULL,NULL),$2),createNode("ignore",createNode("COMMA",NULL,NULL),createNode("CURLY_BRACKET_CLOSE",NULL,NULL)));
+
             }
             ;
 
@@ -1496,21 +1437,21 @@ initializer : assignment_expression
 
 initializer_list : designation_opt initializer 
                 {
-                    //$$=createNode("initializer_list",$1,$2);
+
                 }
                  | initializer_list COMMA designation_opt initializer 
                  {
-                    //$$=createNode("initializer_list",createNode("ignore",$1,createNode("COMMA",NULL,NULL)),createNode("ignore",$3,$4));
+
                 }
                  ;
 
 designation_opt : designation  
                 {
-                    //$$=createNode("designation_opt",$1,NULL);
+
                 }
                 | 
                 {
-                    //$$ = createNode("designation_opt",NULL,NULL);
+
                 }
                 ;
 
@@ -1518,7 +1459,7 @@ designation_opt : designation
 
 designation : designator_list ASSIGN 
             {
-                //$$=createNode("designation",$1,createNode("ASSIGN",NULL,NULL));
+
             }
             ;
 
@@ -1526,11 +1467,11 @@ designation : designator_list ASSIGN
 
 designator_list : designator 
                 {
-                    //$$=createNode("designator_list",$1,NULL);
+
                 }
                 | designator_list designator 
                 {
-                    //$$=createNode("designator_list",$1,$2);
+
                 }
                 ;
 
@@ -1538,11 +1479,11 @@ designator_list : designator
 
 designator : SQUARE_BRACKET_OPEN constant_expression SQUARE_BRACKET_CLOSE  
             {
-                //$$=createNode("designator",createNode("ignore",createNode("SQUARE_BRACKET_OPEN",NULL,NULL),$2),createNode("SQUARE_BRACKET_CLOSE",NULL,NULL));
+
             }
              | DOT IDENTIFIER 
              {
-                //$$=createNode("designator",createNode("DOT",NULL,NULL),createNode("IDENTIFIER",NULL,NULL));
+
             }
              ;
 
@@ -1553,60 +1494,52 @@ designator : SQUARE_BRACKET_OPEN constant_expression SQUARE_BRACKET_CLOSE
 
 statement : labeled_statement 
             {
-                //$$=createNode("statement",$1,NULL);
+
             }
             | compound_statement 
             {
                 $$ = $1;
-                //$$=createNode("statement",$1,NULL);
             }
             | expression_statement 
             {
                 $$ = new Statement();
                 $$->NextList = $1->NextList;
-                //$$=createNode("statement",$1,NULL);
             }
             | selection_statement 
             {
                $$ = $1;
-                //$$=createNode("statement",$1,NULL);
             }
             | iteration_statement 
             {
                 $$ = $1;
-                //$$=createNode("statement",$1,NULL);
             }
             | jump_statement 
             {
                 $$ = $1;
-                //$$=createNode("statement",$1,NULL);
             }
             ;
 
 loop_block:labeled_statement 
             {
-                //$$=createNode("statement",$1,NULL);
+
             }
             | expression_statement 
             {
                 $$ = new Statement();
                 $$->NextList = $1->NextList;
-                //$$=createNode("statement",$1,NULL);
             }
             | selection_statement 
             {
                $$ = $1;
-                //$$=createNode("statement",$1,NULL);
             }
             | iteration_statement 
             {
                 $$ = $1;
-                //$$=createNode("statement",$1,NULL);
             }
             | jump_statement 
             {
                 $$ = $1;
-                //$$=createNode("statement",$1,NULL);
+
             }
             ;
 
@@ -1615,31 +1548,30 @@ loop_block:labeled_statement
 
 labeled_statement : IDENTIFIER COLON statement  
                     {
-                        //$$=$$=createNode("labeled_statement",createNode("ignore",createNode("IDENTIFIER",NULL,NULL),createNode("COLON",NULL,NULL)),$3);
+
                     }
                     | CASE constant_expression COLON statement  
                     {
-                        //$$=createNode("labeled_statement",createNode("ignore",createNode("CASE",NULL,NULL),$2),createNode("ignore",createNode("CASE",NULL,NULL),$4));
+
                     }
                     | DEFAULT COLON statement 
                     {
-                        //$$=createNode("labeled_statement",createNode("ignore",createNode("DEFAULT",NULL,NULL),createNode("COLON",NULL,NULL)),$3);
+
                     }
                     ;
 
 /*_______ COMPOUND STATEMENT ________*/
 
 compound_statement : CURLY_BRACKET_OPEN createST switch_table block_item_list_opt CURLY_BRACKET_CLOSE 
+                    /*createST,switch_table are added for augmentation*/
                     {
                         $$ = $4;
                         CurrentST = CurrentST->PtrToParent;
-                        //$$=createNode("compound_statement",createNode("ignore",createNode("CURLY_BRACKET_OPEN",NULL,NULL),$2),createNode("CURLY_BRACKET_CLOSE",NULL,NULL));
                     }
                     ;
-
+/*createST is New Symbol used to create new symbol table  */
 createST:
         {
-            // cout << "Block Type:" << BlockType<< endl;
             string New_ST = CurrentST->Name+"_"+BlockType+"_"+to_string(SymbolTableCount++);
             Symbol* TempSym = CurrentST->LookUp(New_ST);
             TempSym->NestedTable = new SymbolTable(New_ST);
@@ -1653,12 +1585,10 @@ createST:
 block_item_list_opt :   
                     {
                        $$ = new Statement();
-                        //$$ = createNode("block_item_list_opt",NULL,NULL);
                     } 
                     | block_item_list 
                     {
                         $$ = $1;
-                        //$$=createNode("block_item_list_opt",$1,NULL);
                     }
                     ;
 
@@ -1667,13 +1597,12 @@ block_item_list_opt :
 block_item_list : block_item  
                 {
                     $$ = $1;
-                    //$$=createNode("block_item_list",$1,NULL);
                 }
                 | block_item_list countinst block_item 
+                /*countinst added for augmentation */
                 {
                     $$ = $3;
                     BackPatch($1->NextList,$2);
-                    //$$=createNode("block_item_list",$1,$2);
                 }
                 ;
 
@@ -1682,12 +1611,10 @@ block_item_list : block_item
 block_item : declaration  
             {
                 $$ = new Statement();
-                //$$=createNode("block_item",$1,NULL);
             }
             | statement 
             {
                 $$ = $1;
-                //$$=createNode("block_item",$1,NULL);
             }
             ;
 
@@ -1696,25 +1623,23 @@ block_item : declaration
 expression_statement : expression_opt SEMICOLON 
                     {
                         $$ = $1;
-                        //$$=createNode("expression_statement",$1,createNode("SEMICOLON",NULL,NULL));
                     }
                     ;
 
 expression_opt :   
                 {
                     $$ = new Expression();
-                    //$$ = createNode("expression_opt",NULL,NULL);
                 }
                 | expression  
                 {
                     $$ = $1;
-                    //$$=createNode("expression_opt",$1,NULL);
                 }
                 ;
 
 /*_______ SELECTION STATEMENT ________*/
 
-selection_statement : IF ROUND_BRACKET_OPEN expression newstatement ROUND_BRACKET_CLOSE countinst statement newstatement %prec THEN 
+selection_statement : IF ROUND_BRACKET_OPEN expression newstatement ROUND_BRACKET_CLOSE countinst statement newstatement %prec THEN
+                    /*newstatement ,countinst are added for augmnentation*/
                     {
                         BackPatch($4->NextList,QuadList.InstructionList.size());
                         itob($3);
@@ -1722,7 +1647,6 @@ selection_statement : IF ROUND_BRACKET_OPEN expression newstatement ROUND_BRACKE
                         BackPatch($3->TrueList,$6);
                         list<int> ll = Merge($3->FalseList,$7->NextList);
                         $$->NextList = Merge(ll,$8->NextList);
-                        //$$=createNode("selection_statement",createNode("ignore",createNode("IF",NULL,NULL),createNode("ignore",createNode("ROUND_BRACKET_OPEN",NULL,NULL),$3)),createNode("ignore",createNode("ROUND_BRACKET_CLOSE",NULL,NULL),createNode("ignore",$5,createNode("THEN",NULL,NULL))));
                     }
                     | IF ROUND_BRACKET_OPEN expression newstatement ROUND_BRACKET_CLOSE countinst statement newstatement ELSE countinst statement 
                     {
@@ -1733,17 +1657,17 @@ selection_statement : IF ROUND_BRACKET_OPEN expression newstatement ROUND_BRACKE
                         BackPatch($3->FalseList,$10);
                         list<int> ll = Merge($7->NextList,$8->NextList);
                         $$->NextList = Merge(ll,$11->NextList);
-                        //$$=createNode("selection_statement",createNode("ignore",createNode("IF",NULL,NULL),createNode("ignore",createNode("ROUND_BRACKET_OPEN",NULL,NULL),$3)),createNode("ignore",createNode("ROUND_BRACKET_CLOSE",NULL,NULL),createNode("ignore",$5,createNode("ignore",createNode("ELSE",NULL,NULL),$7))));
                     }
                     | SWITCH ROUND_BRACKET_OPEN expression ROUND_BRACKET_CLOSE statement 
                     {
-                        //$$=createNode("selection_statement",createNode("ignore",createNode("SWITCH",NULL,NULL),createNode("ignore",createNode("ROUND_BRACKET_OPEN",NULL,NULL),$3)),createNode("ignore",createNode("ROUND_BRACKET_CLOSE",NULL,NULL),$5));
+
                     }
                     ;
 
 /*_______ ITERATION STATEMENT ________*/
 
 iteration_statement : WHILE whilestart ROUND_BRACKET_OPEN createST switch_table countinst expression ROUND_BRACKET_CLOSE countinst loop_block 
+                    /* whilestart   sets block type  ,createST,switch_table,countinst are added for augementation */
                     {
                         $$ = new Statement();
                         itob($7);
@@ -1753,7 +1677,6 @@ iteration_statement : WHILE whilestart ROUND_BRACKET_OPEN createST switch_table 
                         QuadArray::Emit("goto",itos($6));
                         BlockType="";
                         CurrentST = CurrentST->PtrToParent;
-                        //$$=createNode("iteration_statement",createNode("ignore",createNode("WHILE",NULL,NULL),createNode("ignore",createNode("ROUND_BRACKET_OPEN",NULL,NULL),$3)),createNode("ignore",createNode("ROUND_BRACKET_CLOSE",NULL,NULL),$5));
                     }
                     | WHILE whilestart ROUND_BRACKET_OPEN createST switch_table countinst expression ROUND_BRACKET_CLOSE countinst CURLY_BRACKET_OPEN  block_item_list_opt CURLY_BRACKET_CLOSE  
                     {
@@ -1765,9 +1688,9 @@ iteration_statement : WHILE whilestart ROUND_BRACKET_OPEN createST switch_table 
                         QuadArray::Emit("goto",itos($6));
                         BlockType="";
                         CurrentST = CurrentST->PtrToParent;
-                        //$$=createNode("iteration_statement",createNode("ignore",createNode("WHILE",NULL,NULL),createNode("ignore",createNode("ROUND_BRACKET_OPEN",NULL,NULL),$3)),createNode("ignore",createNode("ROUND_BRACKET_CLOSE",NULL,NULL),$5));
                     }
                     | DO dostart createST switch_table countinst loop_block WHILE ROUND_BRACKET_OPEN countinst expression ROUND_BRACKET_CLOSE SEMICOLON 
+                    /*dostart sets blocktype ,createST ,switch_table,countinst,newstatement,are added for augmentation*/
                     {
                         $$ = new Statement();
                         itob($10);
@@ -1776,7 +1699,6 @@ iteration_statement : WHILE whilestart ROUND_BRACKET_OPEN createST switch_table 
                         $$->NextList = $10->FalseList;
                         BlockType="";
                         CurrentST = CurrentST->PtrToParent;
-                        //$$=createNode("iteration_statement",createNode("DO",NULL,NULL),createNode("ignore",$2,createNode("ignore",createNode("WHILE",NULL,NULL),createNode("ignore",createNode("ROUND_BRACKET_OPEN",NULL,NULL),createNode("ignore",$5,createNode("ignore",createNode("ROUND_BRACKET_CLOSE",NULL,NULL),createNode("SEMICOLON",NULL,NULL)))))));
                     }
                     | DO dostart CURLY_BRACKET_OPEN createST switch_table countinst block_item_list_opt CURLY_BRACKET_CLOSE WHILE ROUND_BRACKET_OPEN countinst expression ROUND_BRACKET_CLOSE SEMICOLON 
                     {
@@ -1787,9 +1709,9 @@ iteration_statement : WHILE whilestart ROUND_BRACKET_OPEN createST switch_table 
                         $$->NextList = $12->FalseList;
                         BlockType="";
                         CurrentST = CurrentST->PtrToParent;
-                        //$$=createNode("iteration_statement",createNode("DO",NULL,NULL),createNode("ignore",$2,createNode("ignore",createNode("WHILE",NULL,NULL),createNode("ignore",createNode("ROUND_BRACKET_OPEN",NULL,NULL),createNode("ignore",$5,createNode("ignore",createNode("ROUND_BRACKET_CLOSE",NULL,NULL),createNode("SEMICOLON",NULL,NULL)))))));
                     }
-                    | FOR forstart ROUND_BRACKET_OPEN createST switch_table expression_opt SEMICOLON countinst expression_opt SEMICOLON countinst expression_opt newstatement ROUND_BRACKET_CLOSE countinst loop_block 
+                    | FOR forstart ROUND_BRACKET_OPEN createST switch_table expression_opt SEMICOLON countinst expression_opt SEMICOLON countinst expression_opt newstatement ROUND_BRACKET_CLOSE countinst loop_block
+                    /*forstart sets blocktype ,createST ,switch_table,countinst,newstatement,are added for augmentation*/                     
                     {
                         $$ = new Statement();
                         itob($9);
@@ -1800,7 +1722,6 @@ iteration_statement : WHILE whilestart ROUND_BRACKET_OPEN createST switch_table 
                         $$->NextList = $9->FalseList;
                         BlockType = "";
                         CurrentST = CurrentST->PtrToParent;
-                        //$$=createNode("iteration_statement",createNode("FOR",NULL,NULL),createNode("ignore",createNode("ROUND_BRACKET_OPEN",NULL,NULL),createNode("ignore",$3,createNode("ignore",createNode("SEMICOLON",NULL,NULL),createNode("ignore",$5,createNode("ignore",createNode("SEMICOLON",NULL,NULL),createNode("ignore",$7,createNode("ignore",createNode("ROUND_BRACKET_CLOSE",NULL,NULL),$9))))))));
                     }
                     | FOR forstart ROUND_BRACKET_OPEN createST switch_table expression_opt SEMICOLON countinst expression_opt SEMICOLON countinst expression_opt newstatement ROUND_BRACKET_CLOSE countinst CURLY_BRACKET_OPEN block_item_list_opt CURLY_BRACKET_CLOSE  
                     {
@@ -1813,7 +1734,6 @@ iteration_statement : WHILE whilestart ROUND_BRACKET_OPEN createST switch_table 
                         $$->NextList = $9->FalseList;
                         BlockType = "";
                         CurrentST = CurrentST->PtrToParent;
-                        //$$=createNode("iteration_statement",createNode("FOR",NULL,NULL),createNode("ignore",createNode("ROUND_BRACKET_OPEN",NULL,NULL),createNode("ignore",$3,createNode("ignore",createNode("SEMICOLON",NULL,NULL),createNode("ignore",$5,createNode("ignore",createNode("SEMICOLON",NULL,NULL),createNode("ignore",$7,createNode("ignore",createNode("ROUND_BRACKET_CLOSE",NULL,NULL),$9))))))));
                     }
                     | FOR forstart ROUND_BRACKET_OPEN createST switch_table declaration countinst expression_opt SEMICOLON countinst expression_opt newstatement ROUND_BRACKET_CLOSE countinst loop_block 
                     {
@@ -1826,7 +1746,6 @@ iteration_statement : WHILE whilestart ROUND_BRACKET_OPEN createST switch_table 
                         $$->NextList = $8->FalseList;
                         BlockType = "";
                         CurrentST = CurrentST->PtrToParent;
-                        //$$=createNode("iteration_statement",createNode("FOR",NULL,NULL),createNode("ignore",createNode("ROUND_BRACKET_OPEN",NULL,NULL),createNode("ignore",$3,createNode("ignore",$4,createNode("ignore",createNode("SEMICOLON",NULL,NULL),createNode("ignore",$6,createNode("ignore",createNode("ROUND_BRACKET_CLOSE",NULL,NULL),$8)))))));
                     }
                     | FOR forstart ROUND_BRACKET_OPEN createST switch_table declaration countinst expression_opt SEMICOLON countinst expression_opt newstatement ROUND_BRACKET_CLOSE countinst CURLY_BRACKET_OPEN block_item_list_opt CURLY_BRACKET_CLOSE  
                     {
@@ -1839,22 +1758,21 @@ iteration_statement : WHILE whilestart ROUND_BRACKET_OPEN createST switch_table 
                         $$->NextList = $8->FalseList;
                         BlockType = "";
                         CurrentST = CurrentST->PtrToParent;
-                        //$$=createNode("iteration_statement",createNode("FOR",NULL,NULL),createNode("ignore",createNode("ROUND_BRACKET_OPEN",NULL,NULL),createNode("ignore",$3,createNode("ignore",$4,createNode("ignore",createNode("SEMICOLON",NULL,NULL),createNode("ignore",$6,createNode("ignore",createNode("ROUND_BRACKET_CLOSE",NULL,NULL),$8)))))));
                     }
                     ;
-
+/*forstart :creates the "for" label*/
 forstart:
         {
             BlockType="for_loop";
         } 
         ;
-
+/*forstart :creates the "while_loop" label*/
 whilestart:
          {
             BlockType="while_loop";
         }
         ;
-
+/*forstart :creates the "do_While_loop" label*/
 dostart:
          {
             BlockType="do_while_loop";
@@ -1865,23 +1783,20 @@ dostart:
 
 jump_statement : GOTO IDENTIFIER SEMICOLON   
                 {
-                    //$$=createNode("jump_statement",createNode("GOTO",NULL,NULL),createNode("ignore",createNode("IDENTIFIER",NULL,NULL),createNode("SEMICOLON",NULL,NULL)));
+
                 }
                 | CONTINUE SEMICOLON  
                 {
                     $$ = new Statement();
-                    //$$=createNode("jump_statement",createNode("CONTINUE",NULL,NULL),createNode("SEMICOLON",NULL,NULL));
                 }
                 | BREAK SEMICOLON 
                 {
                     $$ = new Statement();
-                    //$$=createNode("jump_statement",createNode("BREAK",NULL,NULL),createNode("SEMICOLON",NULL,NULL));
                 }
                | RETURN expression_opt SEMICOLON 
                 {
                     $$ = new Statement();
                     QuadArray::Emit("return",$2->Location->Name);
-                //$$=createNode("jump_statement",createNode("RETURN",NULL,NULL),createNode("ignore",$2,createNode("SEMICOLON",NULL,NULL)));
                 }
                ;
 
@@ -1893,11 +1808,11 @@ jump_statement : GOTO IDENTIFIER SEMICOLON
 
 translation_unit : external_declaration 
                 {
-                    //$$=createNode("translation_unit",$1,NULL);
+
                 }
                  | translation_unit external_declaration 
                 {
-                    //$$=createNode("translation_unit",$1,$2);
+
                 }
                  ;
 
@@ -1905,11 +1820,11 @@ translation_unit : external_declaration
 
 external_declaration : function_definition 
                     {
-                        //$$=createNode("external_declaration",$1,NULL);
+
                     }
                      | declaration 
                      {
-                        //$$=createNode("external_declaration",$1,NULL);
+
                     }
                      ;
 
@@ -1920,17 +1835,16 @@ function_definition : declaration_specifiers declarator declaration_list_opt CUR
                         CurrentST->PtrToParent = GlobalST;
                         SymbolTableCount=0;
                         CurrentST = GlobalST;
-                        //$$=createNode("function_definition",createNode("ignore",$1,$2),createNode("ignore",$3,$4));
                     }
                     ;
 
 declaration_list_opt :  
                     {
-                        //$$ = createNode("declaration_list_opt",NULL,NULL);
+                        
                     }
                      | declaration_list 
                     {
-                        //$$=createNode("declaration_list_opt",$1,NULL);
+
                     }
                      ;
 
@@ -1938,11 +1852,11 @@ declaration_list_opt :
 
 declaration_list : declaration 
                 {
-                    //$$=createNode("declaration_list",$1,NULL);
+
                 }
                  | declaration_list declaration 
                 {
-                    //$$=createNode("declaration_list",$1,$2);
+
                 }
                  ;
 
