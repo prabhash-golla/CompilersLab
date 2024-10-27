@@ -226,10 +226,10 @@ void QuadArray::Print() {
     // Iterate through the instruction list and print each quad
     for (vector<Quad>::iterator it = this->InstructionList.begin(); it != this->InstructionList.end(); it++, Counter++) {
         if (it->Op != "label") {
-            cout << left << setw(4) << Counter << ":    ";  // Print counter for non-label quads
+            cout << left << setw(4) << Counter << ":\t";  // Print counter for non-label quads
             it->Print();  // Call Print method for the quad
         } else {
-            cout << nl << left << setw(4) << Counter << ":";  // Print label counter
+            cout << nl << left << setw(4) << Counter << ": ";  // Print label counter
             it->Print();  // Call Print method for the label quad
         }
         cout << nl;  // Print a newline after each quad

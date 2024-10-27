@@ -73,6 +73,7 @@ initializer_list  init_declarator_list  logical_and_expression logical_or_expres
 //Augmenting symbols
 %type<Stateme> newstatement
 %type<InstCount> countinst
+%type forstart whilestart dostart switch_table createST
 
 %start translation_unit
 
