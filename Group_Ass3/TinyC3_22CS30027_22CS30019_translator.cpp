@@ -108,7 +108,6 @@ Symbol* SymbolTable::LookUp(string Name)
 
 void SymbolTable::Print()
 {
-    cout << nl;
     cout << "______________________________________________________________________________________________________________________________________________" <<nl<<nl;
     cout << "Symbol Table Name : "  << setfill(' ') << left << setw(50) << this->Name;
     cout << "Parent : " <<  setfill(' ') << left << setw(50) << ((this->PtrToParent != NULL) ? this->PtrToParent->Name : "NULL") << nl;
@@ -272,11 +271,13 @@ list<int> Merge(list<int> &p1,list<int> &p2)
     return p1;
 }
 
-void BackPath(list<int> &p,int i)
+void BackPatch(list<int> &p,int i)
 {
     string S = itos(i);
+    // cout << "BacjPathch" << i << endl;
     for(list<int>::iterator it = p.begin();it != p.end();it++)
     {
+        // cout << "BackPath" <<QuadList.InstructionList[*it].Arg1 << S << nl;
         QuadList.InstructionList[*it].Result=S;
     }
 }
@@ -308,13 +309,15 @@ bool TypeCheck(SType* E1,SType* E2)
     if(E1->Type!=E2->Type) return false;
     return TypeCheck(E1->ArrType,E2->ArrType);
 }
+
 // TypeConvertor function to convert a symbol of one type to another type 
 Symbol* TypeConvertor(Symbol* Old, string New) {
     // Generate a temporary symbol with the new type
     Symbol* Temp = SymbolTable::GenTemp(new SType(New));
 
     // Check if the current type of Old is "float"
-    if (Old->Type->Type == "float") {
+    if (Old->Type->Type == "float")
+    {
         if (New == "int") {
             QuadArray::Emit("=", Temp->Name, "floattoint(" + Old->Name + ")");
             return Temp;
@@ -327,7 +330,8 @@ Symbol* TypeConvertor(Symbol* Old, string New) {
     }
 
     // Check if the current type of Old is "int"
-    else if (Old->Type->Type == "int") {
+    else if (Old->Type->Type == "int")
+    {
         if (New == "float") {
             QuadArray::Emit("=", Temp->Name, "inttofloat(" + Old->Name + ")");
             return Temp;
@@ -340,7 +344,8 @@ Symbol* TypeConvertor(Symbol* Old, string New) {
     }
 
     // Check if the current type of Old is "char"
-    else if (Old->Type->Type == "char") {
+    else if (Old->Type->Type == "char")
+    {
         if (New == "float") {
             QuadArray::Emit("=", Temp->Name, "chartofloat(" + Old->Name + ")");
             return Temp;
@@ -418,10 +423,10 @@ Expression* btoi(Expression* E)
     if(E->Type=="bool")
     {
         E->Location = SymbolTable::GenTemp(new SType("int"));
-        BackPath(E->TrueList,QuadList.InstructionList.size());
+        BackPatch(E->TrueList,QuadList.InstructionList.size());
         QuadArray::Emit("=",E->Location->Name,"true");
         QuadArray::Emit("goto",itos(QuadList.InstructionList.size()+1));
-        BackPath(E->FalseList,QuadList.InstructionList.size());
+        BackPatch(E->FalseList,QuadList.InstructionList.size());
         QuadArray::Emit("=",E->Location->Name,"false");
     }
     return E;
@@ -441,23 +446,22 @@ Expression* itob(Expression* E)
 
 int main()
 {
-
-    
-
     try {
         // Memory allocation code
         SymbolTableCount = 0;
         GlobalST = new SymbolTable("Global");
         CurrentST = GlobalST;
-
         BlockType = "";
         VarType = ""; 
-        yyparse();
+        if (yyparse() != 0) 
+        {
+            cout << "Parsing failed due to syntax errors." << nl;
+            return 0;
+        }
     } catch (const std::bad_alloc& e) {
-        std::cerr << "Memory allocation failed: " << e.what() << std::endl;
+        cout << "Memory allocation failed: " << e.what() << nl;
         return 0;
     }
-
 
     GlobalST->Update();
     GlobalST->Print();

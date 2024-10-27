@@ -74,7 +74,6 @@ WS							[ \t\v\n\f]
 "do"						{return DO;}
 "double"					{return DOUBLE;}
 "else"						{return ELSE;}
-"enum"						{return ENUM;}
 "extern"					{return EXTERN;}
 "register"					{return REGISTER;}
 "float"						{return FLOAT;}
@@ -90,10 +89,7 @@ WS							[ \t\v\n\f]
 "signed"					{return SIGNED;}
 "sizeof"					{return SIZEOF;}
 "static"					{return STATIC;}
-"struct"					{return STRUCT;}
 "switch"					{return SWITCH;}
-"typedef"					{return TYPEDEF;}
-"union"						{return UNION;}
 "unsigned"					{return UNSIGNED;}
 "void"						{return VOID;}
 "volatile"					{return VOLATILE;}
@@ -155,7 +151,6 @@ WS							[ \t\v\n\f]
 "^="				{return BITWISE_XOR_EQUAL;}
 "|="				{return BITWISE_OR_EQUAL;}
 ","					{return COMMA;}
-"#" 				{return HASH;}
 
 {WS}				{/* whitespace separates tokens */}
 

@@ -31,17 +31,13 @@
     Expression* Express;
 }
 
-/*_______ COMMENTS ________*/
-
-%token SINGLE_COMMENT MULTILINE_COMMENT
-
 /*_______ KEYWORDS ________*/
 
-%token AUTO BREAK CASE CHAR CONST CONTINUE DEFAULT DO DOUBLE ELSE ENUM EXTERN REGISTER FLOAT FOR GOTO IF INLINE INT LONG RESTRICT RETURN SHORT SIGNED SIZEOF STATIC STRUCT SWITCH TYPEDEF UNION UNSIGNED VOID VOLATILE WHILE BOOL COMPLEX IMAGINARY
+%token AUTO BREAK CASE CHAR CONST CONTINUE DEFAULT DO DOUBLE ELSE EXTERN REGISTER FLOAT FOR GOTO IF INLINE INT LONG RESTRICT RETURN SHORT SIGNED SIZEOF STATIC SWITCH UNSIGNED VOID VOLATILE WHILE BOOL COMPLEX IMAGINARY
 
 /*_______ PUNCTUATORS AND OPERATORS ________*/
 
-%token SQUARE_BRACKET_OPEN SQUARE_BRACKET_CLOSE ROUND_BRACKET_OPEN ROUND_BRACKET_CLOSE CURLY_BRACKET_OPEN CURLY_BRACKET_CLOSE DOT IMPLIES INCREMENT DECREMENT BITWISE_AND MUL PLUS MINUS BITWISE_NOT NOT DIV MOD LEFT_SHIFT RIGHT_SHIFT LESS_THAN GREATER_THAN LESS_EQUAL GREATER_EQUAL EQUAL NOT_EQUAL BITWISE_XOR BITWISE_OR AND OR QUESTION COLON SEMICOLON ELLIPSIS ASSIGN MUL_EQUAL DIV_EQUAL MOD_EQUAL PLUS_EQUAL MINUS_EQUAL SHIFT_LEFT_EQUAL SHIFT_RIGHT_EQUAL BITWISE_AND_EQUAL BITWISE_XOR_EQUAL BITWISE_OR_EQUAL COMMA HASH
+%token SQUARE_BRACKET_OPEN SQUARE_BRACKET_CLOSE ROUND_BRACKET_OPEN ROUND_BRACKET_CLOSE CURLY_BRACKET_OPEN CURLY_BRACKET_CLOSE DOT IMPLIES INCREMENT DECREMENT BITWISE_AND MUL PLUS MINUS BITWISE_NOT NOT DIV MOD LEFT_SHIFT RIGHT_SHIFT LESS_THAN GREATER_THAN LESS_EQUAL GREATER_EQUAL EQUAL NOT_EQUAL BITWISE_XOR BITWISE_OR AND OR QUESTION COLON SEMICOLON ELLIPSIS ASSIGN MUL_EQUAL DIV_EQUAL MOD_EQUAL PLUS_EQUAL MINUS_EQUAL SHIFT_LEFT_EQUAL SHIFT_RIGHT_EQUAL BITWISE_AND_EQUAL BITWISE_XOR_EQUAL BITWISE_OR_EQUAL COMMA
 
 /*_______ IDENTIFIER ________*/
 
@@ -78,7 +74,7 @@ initializer_list  init_declarator_list  logical_and_expression logical_or_expres
 %type<Stateme> newstatement
 %type<InstCount> countinst
 
-%start start_symbol
+%start translation_unit
 
 %%
 
@@ -348,8 +344,7 @@ cast_expression : unary_expression
                 | ROUND_BRACKET_OPEN type_name ROUND_BRACKET_CLOSE cast_expression 
                 { 
                     $$ = new ArrayType();
-                    $$->Array = $4->Array;
-                    // $$->Array = TypeConvertor($4->Array,varType)
+                    $$->Array = TypeConvertor($4->Array,VarType);
                     //$$ =  createNode("cast_expression", createNode("ROUND_BRACKET_OPEN",NULL,NULL), createNode("ignore",$2,createNode("ignore",createNode("ROUND_BRACKET_CLOSE",NULL,NULL),$4))); 
                 }
                 ;
@@ -707,7 +702,7 @@ logical_and_expression : inclusive_or_expression
                             itob($1);
                             itob($3);
                             $$->Type = "bool";
-                            BackPath($1->TrueList,QuadList.InstructionList.size());
+                            BackPatch($1->TrueList,QuadList.InstructionList.size());
                             $$->TrueList = $3->TrueList;
                             $$->FalseList = Merge($1->FalseList,$3->FalseList);
                             //$$ = createNode("logical_and_expression",$1,createNode("ignore",createNode("AND", NULL, NULL),$3)); 
@@ -727,7 +722,7 @@ logical_or_expression : logical_and_expression
                             itob($1);
                             itob($3);
                             $$->Type = "bool";
-                            BackPath($1->FalseList,QuadList.InstructionList.size());
+                            BackPatch($1->FalseList,QuadList.InstructionList.size());
                             $$->FalseList = $3->FalseList;
                             $$->TrueList = Merge($1->TrueList,$3->TrueList);
                             // $$ = createNode("logical_or_expression",$1,createNode("ignore",createNode("OR", NULL, NULL),$3));  
@@ -748,17 +743,17 @@ conditional_expression : logical_or_expression
                             $$->Location->Update($5->Location->Type);
                             QuadArray::Emit("=",$$->Location->Name,$9->Location->Name);
                             list<int> ll = MakeList(QuadList.InstructionList.size());
-                            QuadArray::Emit("goto","");
-                            BackPath($6->NextList,QuadList.InstructionList.size());
+                            QuadArray::Emit("goto","_");
+                            BackPatch($6->NextList,QuadList.InstructionList.size());
                             QuadArray::Emit("=",$$->Location->Name,$5->Location->Name);
                             list<int> llp = MakeList(QuadList.InstructionList.size());
                             ll = Merge(ll,llp);
-                            QuadArray::Emit("goto","");
-                            BackPath($2->NextList,QuadList.InstructionList.size());
+                            QuadArray::Emit("goto","_");
+                            BackPatch($2->NextList,QuadList.InstructionList.size());
                             itob($1);
-                            BackPath($1->TrueList,$4);
-                            BackPath($1->FalseList,$8);
-                            BackPath(ll,QuadList.InstructionList.size());
+                            BackPatch($1->TrueList,$4);
+                            BackPatch($1->FalseList,$8);
+                            BackPatch(ll,QuadList.InstructionList.size());
                             //$$ = createNode("conditional_expression",$1,createNode("ignore",createNode("QUESTION", NULL, NULL),createNode("ignore",$3,createNode("ignore",createNode("COLON", NULL, NULL),$5))));
                         }
                       ;
@@ -773,7 +768,7 @@ newstatement:
             {
                 $$ = new Statement();
                 $$->NextList = MakeList(QuadList.InstructionList.size());
-                QuadArray::Emit("goto","");
+                QuadArray::Emit("goto","_");
             }
 
 /*_______ ASSIGNMENT EXPRESSION ________*/
@@ -1644,6 +1639,7 @@ compound_statement : CURLY_BRACKET_OPEN createST switch_table block_item_list_op
 
 createST:
         {
+            // cout << "Block Type:" << BlockType<< endl;
             string New_ST = CurrentST->Name+"_"+BlockType+"_"+to_string(SymbolTableCount++);
             Symbol* TempSym = CurrentST->LookUp(New_ST);
             TempSym->NestedTable = new SymbolTable(New_ST);
@@ -1676,7 +1672,7 @@ block_item_list : block_item
                 | block_item_list countinst block_item 
                 {
                     $$ = $3;
-                    BackPath($1->NextList,$2);
+                    BackPatch($1->NextList,$2);
                     //$$=createNode("block_item_list",$1,$2);
                 }
                 ;
@@ -1720,21 +1716,21 @@ expression_opt :
 
 selection_statement : IF ROUND_BRACKET_OPEN expression newstatement ROUND_BRACKET_CLOSE countinst statement newstatement %prec THEN 
                     {
-                        BackPath($4->NextList,QuadList.InstructionList.size());
+                        BackPatch($4->NextList,QuadList.InstructionList.size());
                         itob($3);
                         $$ = new Statement();
-                        BackPath($3->TrueList,$6);
+                        BackPatch($3->TrueList,$6);
                         list<int> ll = Merge($3->FalseList,$7->NextList);
                         $$->NextList = Merge(ll,$8->NextList);
                         //$$=createNode("selection_statement",createNode("ignore",createNode("IF",NULL,NULL),createNode("ignore",createNode("ROUND_BRACKET_OPEN",NULL,NULL),$3)),createNode("ignore",createNode("ROUND_BRACKET_CLOSE",NULL,NULL),createNode("ignore",$5,createNode("THEN",NULL,NULL))));
                     }
                     | IF ROUND_BRACKET_OPEN expression newstatement ROUND_BRACKET_CLOSE countinst statement newstatement ELSE countinst statement 
                     {
-                        BackPath($4->NextList,QuadList.InstructionList.size());
+                        BackPatch($4->NextList,QuadList.InstructionList.size());
                         itob($3);
                         $$ = new Statement();
-                        BackPath($3->TrueList,$6);
-                        BackPath($3->FalseList,$10);
+                        BackPatch($3->TrueList,$6);
+                        BackPatch($3->FalseList,$10);
                         list<int> ll = Merge($7->NextList,$8->NextList);
                         $$->NextList = Merge(ll,$11->NextList);
                         //$$=createNode("selection_statement",createNode("ignore",createNode("IF",NULL,NULL),createNode("ignore",createNode("ROUND_BRACKET_OPEN",NULL,NULL),$3)),createNode("ignore",createNode("ROUND_BRACKET_CLOSE",NULL,NULL),createNode("ignore",$5,createNode("ignore",createNode("ELSE",NULL,NULL),$7))));
@@ -1751,8 +1747,8 @@ iteration_statement : WHILE whilestart ROUND_BRACKET_OPEN createST switch_table 
                     {
                         $$ = new Statement();
                         itob($7);
-                        BackPath($10->NextList,$6);
-                        BackPath($7->TrueList,$9);
+                        BackPatch($10->NextList,$6);
+                        BackPatch($7->TrueList,$9);
                         $$->NextList = $7->FalseList;
                         QuadArray::Emit("goto",itos($6));
                         BlockType="";
@@ -1763,41 +1759,43 @@ iteration_statement : WHILE whilestart ROUND_BRACKET_OPEN createST switch_table 
                     {
                         $$ = new Statement();
                         itob($7);
-                        BackPath($11->NextList,$6);
-                        BackPath($7->TrueList,$9);
+                        BackPatch($11->NextList,$6);
+                        BackPatch($7->TrueList,$9);
                         $$->NextList = $7->FalseList;
                         QuadArray::Emit("goto",itos($6));
                         BlockType="";
                         CurrentST = CurrentST->PtrToParent;
                         //$$=createNode("iteration_statement",createNode("ignore",createNode("WHILE",NULL,NULL),createNode("ignore",createNode("ROUND_BRACKET_OPEN",NULL,NULL),$3)),createNode("ignore",createNode("ROUND_BRACKET_CLOSE",NULL,NULL),$5));
                     }
-                    | DO dostart countinst loop_block countinst WHILE ROUND_BRACKET_OPEN expression ROUND_BRACKET_CLOSE SEMICOLON 
-                    {
-                        $$ = new Statement();
-                        itob($8);
-                        BackPath($8->TrueList,$3);
-                        BackPath($4->NextList,$5);
-                        $$->NextList = $8->FalseList;
-                        BlockType="";
-                        //$$=createNode("iteration_statement",createNode("DO",NULL,NULL),createNode("ignore",$2,createNode("ignore",createNode("WHILE",NULL,NULL),createNode("ignore",createNode("ROUND_BRACKET_OPEN",NULL,NULL),createNode("ignore",$5,createNode("ignore",createNode("ROUND_BRACKET_CLOSE",NULL,NULL),createNode("SEMICOLON",NULL,NULL)))))));
-                    }
-                    | DO dostart countinst CURLY_BRACKET_OPEN  block_item_list_opt CURLY_BRACKET_CLOSE  countinst WHILE ROUND_BRACKET_OPEN expression ROUND_BRACKET_CLOSE SEMICOLON 
+                    | DO dostart createST switch_table countinst loop_block WHILE ROUND_BRACKET_OPEN countinst expression ROUND_BRACKET_CLOSE SEMICOLON 
                     {
                         $$ = new Statement();
                         itob($10);
-                        BackPath($10->TrueList,$3);
-                        BackPath($5->NextList,$7);
+                        BackPatch($10->TrueList,$5);
+                        BackPatch($6->NextList,$9);
                         $$->NextList = $10->FalseList;
                         BlockType="";
+                        CurrentST = CurrentST->PtrToParent;
+                        //$$=createNode("iteration_statement",createNode("DO",NULL,NULL),createNode("ignore",$2,createNode("ignore",createNode("WHILE",NULL,NULL),createNode("ignore",createNode("ROUND_BRACKET_OPEN",NULL,NULL),createNode("ignore",$5,createNode("ignore",createNode("ROUND_BRACKET_CLOSE",NULL,NULL),createNode("SEMICOLON",NULL,NULL)))))));
+                    }
+                    | DO dostart CURLY_BRACKET_OPEN createST switch_table countinst block_item_list_opt CURLY_BRACKET_CLOSE WHILE ROUND_BRACKET_OPEN countinst expression ROUND_BRACKET_CLOSE SEMICOLON 
+                    {
+                        $$ = new Statement();
+                        itob($12);
+                        BackPatch($12->TrueList,$6);
+                        BackPatch($7->NextList,$11);
+                        $$->NextList = $12->FalseList;
+                        BlockType="";
+                        CurrentST = CurrentST->PtrToParent;
                         //$$=createNode("iteration_statement",createNode("DO",NULL,NULL),createNode("ignore",$2,createNode("ignore",createNode("WHILE",NULL,NULL),createNode("ignore",createNode("ROUND_BRACKET_OPEN",NULL,NULL),createNode("ignore",$5,createNode("ignore",createNode("ROUND_BRACKET_CLOSE",NULL,NULL),createNode("SEMICOLON",NULL,NULL)))))));
                     }
                     | FOR forstart ROUND_BRACKET_OPEN createST switch_table expression_opt SEMICOLON countinst expression_opt SEMICOLON countinst expression_opt newstatement ROUND_BRACKET_CLOSE countinst loop_block 
                     {
                         $$ = new Statement();
                         itob($9);
-                        BackPath($9->TrueList,$15);
-                        BackPath($13->NextList,$8);
-                        BackPath($16->NextList,$11);
+                        BackPatch($9->TrueList,$15);
+                        BackPatch($13->NextList,$8);
+                        BackPatch($16->NextList,$11);
                         QuadArray::Emit("goto",itos($11));
                         $$->NextList = $9->FalseList;
                         BlockType = "";
@@ -1808,9 +1806,9 @@ iteration_statement : WHILE whilestart ROUND_BRACKET_OPEN createST switch_table 
                     {
                         $$ = new Statement();
                         itob($9);
-                        BackPath($9->TrueList,$15);
-                        BackPath($13->NextList,$8);
-                        BackPath($17->NextList,$11);
+                        BackPatch($9->TrueList,$15);
+                        BackPatch($13->NextList,$8);
+                        BackPatch($17->NextList,$11);
                         QuadArray::Emit("goto",itos($11));
                         $$->NextList = $9->FalseList;
                         BlockType = "";
@@ -1821,9 +1819,9 @@ iteration_statement : WHILE whilestart ROUND_BRACKET_OPEN createST switch_table 
                     {
                         $$ = new Statement();
                         itob($8);
-                        BackPath($8->TrueList,$14);
-                        BackPath($11->NextList,$7);
-                        BackPath($15->NextList,$10);
+                        BackPatch($8->TrueList,$14);
+                        BackPatch($12->NextList,$7);
+                        BackPatch($15->NextList,$10);
                         QuadArray::Emit("goto",itos($10));
                         $$->NextList = $8->FalseList;
                         BlockType = "";
@@ -1834,9 +1832,9 @@ iteration_statement : WHILE whilestart ROUND_BRACKET_OPEN createST switch_table 
                     {
                         $$ = new Statement();
                         itob($8);
-                        BackPath($8->TrueList,$14);
-                        BackPath($11->NextList,$7);
-                        BackPath($16->NextList,$10);
+                        BackPatch($8->TrueList,$14);
+                        BackPatch($12->NextList,$7);
+                        BackPatch($16->NextList,$10);
                         QuadArray::Emit("goto",itos($10));
                         $$->NextList = $8->FalseList;
                         BlockType = "";
@@ -1847,19 +1845,19 @@ iteration_statement : WHILE whilestart ROUND_BRACKET_OPEN createST switch_table 
 
 forstart:
         {
-            BlockType="FOR";
+            BlockType="for_loop";
         } 
         ;
 
 whilestart:
          {
-            BlockType="WHILE";
+            BlockType="while_loop";
         }
         ;
 
 dostart:
          {
-            BlockType="DO";
+            BlockType="do_while_loop";
         }
         ;
 
@@ -1892,12 +1890,6 @@ jump_statement : GOTO IDENTIFIER SEMICOLON
 /*__ 2. EXTERNAL DEFINITIONS _______________________________________*/
 
 /*_______ TRANSLATION UNIT ________*/
-
-start_symbol : translation_unit 
-                {
-                    //printTree($1,0);
-                }
-                ;
 
 translation_unit : external_declaration 
                 {
