@@ -1,4 +1,7 @@
-int main() {
+//check all the types of pointers
+
+int main() 
+{
     int a = 5;
     int b = 10;
     int *p1, *p2;
@@ -21,8 +24,20 @@ int main() {
 
     int sum = 0;
     for (int i = 0; i < 3; i++) {
-        // sum += *(ptr + i); // Access each element by incrementing pointer
+        sum += *ptr; 
     }
+
+    int a1[10], a2[10][20], a3[5][10][15]; //1D,2D,3D Array 
+    float *f1, **f2, ***f3;               //pointers to respective arrays
+
+
+    // Pointer manipulication
+    a1[5] = a2[1][2];
+    a2[5][6] = a3[1][2][3];
+    a3[0][0][0] = ***f3;
+    ***f3 = **f2;
+    **f2 = a2[9][19];
+    *f1 = **f2;
 
     return sum;
 }

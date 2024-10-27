@@ -1,14 +1,31 @@
-//Typecasting(implicit and explicit) and pointers
+//Function call with array pointers and if else statements
+
+int ADDER(int a[],int n)
+{
+    int sum=0;
+	for (int i=0;i<n;i++)
+    {
+        sum=sum+a[i];
+    }
+    return sum;
+}
+
 int main()
 {
-    int n=5;
-    float b=8.5;
-    int c=(int)b;
-    float x=b*n;
-    int y=(int)x;
-    int z=n*b;
-    int *p;
-    p = &n;
-    *p=10;
-    return 0;
+    int n = 10;
+	int a[n];
+    int ans;
+    int sum=ADDER(a,n);
+	if(sum==n)
+	{
+		ans=0;
+	}
+	else if(sum>n)
+	{
+		ans=sum-n;
+	}
+	else{
+        ans=1;
+    }
+	return 0;
 }
