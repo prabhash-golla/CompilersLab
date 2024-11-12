@@ -273,12 +273,23 @@ class RegisterBank
             for(int i =0;i<NumReg;i++)
             {
                 if(i==cantuse) continue;
-                if(Reg[i].Score>=minscore) continue;
-                minscore = Reg[i].Score;
+                int j =0;
+                for(vector<Symbol*>::iterator SymIt = Reg[i].Symbols.begin(); SymIt<Reg[i].Symbols.end();SymIt++)
+                {
+                    // cout << i <<(*SymIt)->Name << " " ;
+                    // cout << LastLine[(*SymIt)->Name] << " " << LineNo << " " << endl; 
+                    if((*SymIt)->Name[0]=='$' && LastLine[(*SymIt)->Name]<=LineNo) 
+                    {
+                        j++;
+                    }
+                }
+                if(Reg[i].Score-j>=minscore) continue;
+                minscore = Reg[i].Score-j;
                 min = i;
             }
             for(vector<Symbol*>::iterator SymIt = Reg[min].Symbols.begin(); SymIt<Reg[min].Symbols.end();SymIt++)
             {
+                if( (*SymIt)->Name[0]=='$' && LastLine[(*SymIt)->Name]<=LineNo) continue;
                 EmitTCG("ST",(*SymIt)->Name,"R"+itos((*SymIt)->RegNum));
                 (*SymIt)->RegNum = -1;
                 (*SymIt)->changeVal = true;
@@ -304,15 +315,26 @@ class RegisterBank
             for(int i =0;i<NumReg;i++)
             {
                 if(i==cantuse) continue;
-                if(Reg[i].Score>=minscore) continue;
-                minscore = Reg[i].Score;
+                int j =0;
+                for(vector<Symbol*>::iterator SymIt = Reg[i].Symbols.begin(); SymIt<Reg[i].Symbols.end();SymIt++)
+                {
+                    // cout << i <<(*SymIt)->Name << " " ;
+                    // cout << LastLine[(*SymIt)->Name] << " " << LineNo << " " << endl; 
+                    if((*SymIt)->Name[0]=='$' && LastLine[(*SymIt)->Name]<=LineNo) 
+                    {
+                        j++;
+                    }
+                }
+                if(Reg[i].Score-j>=minscore) continue;
+                minscore = Reg[i].Score-j;
                 min = i;
             }
             for(vector<Symbol*>::iterator SymIt = Reg[min].Symbols.begin(); SymIt<Reg[min].Symbols.end();SymIt++)
             {
+                if((*SymIt)->Name[0]=='$' && LastLine[(*SymIt)->Name]<=LineNo) continue;
                 EmitTCG("ST",(*SymIt)->Name,"R"+itos((*SymIt)->RegNum));
                 (*SymIt)->RegNum = -1;
-                (*SymIt)->changeVal = true;
+                (*SymIt)->changeVal = true; 
             }
             Reg[min].Symbols.clear();
             Reg[min].LastUse=true;
@@ -343,7 +365,7 @@ class RegisterBank
                 if(!Reg[i].Symbols.size()) return i+1;
             }
 
-            // cout << "Golla3" << endl;
+            // cout << "Golla3" << endl << LineNo << nl;
             // Method 3
             //If there is a register such that all the variables and temporaries stored in that register have latest values in
             //memory, load A to that register, after deleting that register from the storage locations of all those variables and
@@ -402,7 +424,7 @@ class RegisterBank
             }
 
             
-            // cout << "Golla6" << endl;
+            // cout << "Golla6" << endl << Arg1->Name;
             // Method 6
             // The score of a register is the number of variables and temporaries stored in that register, whose latest values
             // are not available in memory. Find a register with the least score. For that register, save all unsaved variables
@@ -412,12 +434,24 @@ class RegisterBank
             int min = 0;
             for(int i =1;i<NumReg;i++)
             {
-                if(Reg[i].Score>=minscore) continue;
-                minscore = Reg[i].Score;
+                int j =0;
+                for(vector<Symbol*>::iterator SymIt = Reg[i].Symbols.begin(); SymIt<Reg[i].Symbols.end();SymIt++)
+                {
+                    // cout << i <<(*SymIt)->Name << " " ;
+                    // cout << LastLine[(*SymIt)->Name] << " " << LineNo << " " << endl; 
+                    if((*SymIt)->Name[0]=='$' && LastLine[(*SymIt)->Name]<=LineNo) 
+                    {
+                        j++;
+                    }
+                }
+                if(Reg[i].Score-j>=minscore) continue;
+                minscore = Reg[i].Score-j;
                 min = i;
             }
+            // cout << min << nl;
             for(vector<Symbol*>::iterator SymIt = Reg[min].Symbols.begin(); SymIt!=Reg[min].Symbols.end();SymIt++)
             {
+                if( (*SymIt)->Name[0]=='$' && LastLine[(*SymIt)->Name]<=LineNo) continue;
                 EmitTCG("ST",(*SymIt)->Name,"R"+itos((*SymIt)->RegNum));
                 (*SymIt)->RegNum = -1;
                 (*SymIt)->changeVal = true;

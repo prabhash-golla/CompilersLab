@@ -323,5 +323,6 @@ RELN :
 // Error handling function
 void yyerror(string s) 
 {
-
+    cout << nl <<"Parsing is Unsucessful And Execution Terminated" << nl << nl;
+    exit(0);
 }
