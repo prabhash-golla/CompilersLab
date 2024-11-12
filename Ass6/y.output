@@ -1,0 +1,559 @@
+Grammar
+
+    0 $accept: LIST $end
+
+    1 LIST: STMT
+    2     | STMT LIST
+
+    3 STMT: ASGN
+    4     | COND
+    5     | LOOP
+
+    6 ASGN: LP SET IDEN ATOM RP
+
+    7 COND: LP WHEN BOOL B LIST RP B M
+
+    8 B: ε
+
+    9 LOOP: LP B M LOOP_WHILE BOOL B LIST RP M
+
+   10 M: ε
+
+   11 EXPR: LP OPER ATOM ATOM RP
+
+   12 BOOL: LP RELN ATOM ATOM RP
+
+   13 ATOM: IDEN
+   14     | NUMB
+   15     | EXPR
+
+   16 OPER: ADD
+   17     | SUB
+   18     | MUL
+   19     | DIV
+   20     | MOD
+
+   21 RELN: EQ
+   22     | NE
+   23     | LT
+   24     | GT
+   25     | LE
+   26     | GE
+
+
+Terminals, with rules where they appear
+
+    $end (0) 0
+    error (256)
+    SET <num> (258) 6
+    SUB <num> (259) 17
+    ADD <num> (260) 16
+    MUL <num> (261) 18
+    DIV <num> (262) 19
+    MOD <num> (263) 20
+    LP <num> (264) 6 7 9 11 12
+    RP <num> (265) 6 7 9 11 12
+    WHEN <num> (266) 7
+    LOOP_WHILE <num> (267) 9
+    EQ <num> (268) 21
+    NE <num> (269) 22
+    LT <num> (270) 23
+    GT <num> (271) 24
+    LE <num> (272) 25
+    GE <num> (273) 26
+    IDEN <id> (274) 6 13
+    NUMB <id> (275) 14
+
+
+Nonterminals, with rules where they appear
+
+    $accept (21)
+        on left: 0
+    LIST (22)
+        on left: 1 2
+        on right: 0 2 7 9
+    STMT (23)
+        on left: 3 4 5
+        on right: 1 2
+    ASGN (24)
+        on left: 6
+        on right: 3
+    COND (25)
+        on left: 7
+        on right: 4
+    B (26)
+        on left: 8
+        on right: 7 9
+    LOOP (27)
+        on left: 9
+        on right: 5
+    M <num> (28)
+        on left: 10
+        on right: 7 9
+    EXPR <a> (29)
+        on left: 11
+        on right: 15
+    BOOL <num> (30)
+        on left: 12
+        on right: 7 9
+    ATOM <a> (31)
+        on left: 13 14 15
+        on right: 6 11 12
+    OPER <b> (32)
+        on left: 16 17 18 19 20
+        on right: 11
+    RELN <b> (33)
+        on left: 21 22 23 24 25 26
+        on right: 12
+
+
+State 0
+
+    0 $accept: • LIST $end
+
+    LP  shift, and go to state 1
+
+    LIST  go to state 2
+    STMT  go to state 3
+    ASGN  go to state 4
+    COND  go to state 5
+    LOOP  go to state 6
+
+
+State 1
+
+    6 ASGN: LP • SET IDEN ATOM RP
+    7 COND: LP • WHEN BOOL B LIST RP B M
+    9 LOOP: LP • B M LOOP_WHILE BOOL B LIST RP M
+
+    SET   shift, and go to state 7
+    WHEN  shift, and go to state 8
+
+    $default  reduce using rule 8 (B)
+
+    B  go to state 9
+
+
+State 2
+
+    0 $accept: LIST • $end
+
+    $end  shift, and go to state 10
+
+
+State 3
+
+    1 LIST: STMT •
+    2     | STMT • LIST
+
+    LP  shift, and go to state 1
+
+    $default  reduce using rule 1 (LIST)
+
+    LIST  go to state 11
+    STMT  go to state 3
+    ASGN  go to state 4
+    COND  go to state 5
+    LOOP  go to state 6
+
+
+State 4
+
+    3 STMT: ASGN •
+
+    $default  reduce using rule 3 (STMT)
+
+
+State 5
+
+    4 STMT: COND •
+
+    $default  reduce using rule 4 (STMT)
+
+
+State 6
+
+    5 STMT: LOOP •
+
+    $default  reduce using rule 5 (STMT)
+
+
+State 7
+
+    6 ASGN: LP SET • IDEN ATOM RP
+
+    IDEN  shift, and go to state 12
+
+
+State 8
+
+    7 COND: LP WHEN • BOOL B LIST RP B M
+
+    LP  shift, and go to state 13
+
+    BOOL  go to state 14
+
+
+State 9
+
+    9 LOOP: LP B • M LOOP_WHILE BOOL B LIST RP M
+
+    $default  reduce using rule 10 (M)
+
+    M  go to state 15
+
+
+State 10
+
+    0 $accept: LIST $end •
+
+    $default  accept
+
+
+State 11
+
+    2 LIST: STMT LIST •
+
+    $default  reduce using rule 2 (LIST)
+
+
+State 12
+
+    6 ASGN: LP SET IDEN • ATOM RP
+
+    LP    shift, and go to state 16
+    IDEN  shift, and go to state 17
+    NUMB  shift, and go to state 18
+
+    EXPR  go to state 19
+    ATOM  go to state 20
+
+
+State 13
+
+   12 BOOL: LP • RELN ATOM ATOM RP
+
+    EQ  shift, and go to state 21
+    NE  shift, and go to state 22
+    LT  shift, and go to state 23
+    GT  shift, and go to state 24
+    LE  shift, and go to state 25
+    GE  shift, and go to state 26
+
+    RELN  go to state 27
+
+
+State 14
+
+    7 COND: LP WHEN BOOL • B LIST RP B M
+
+    $default  reduce using rule 8 (B)
+
+    B  go to state 28
+
+
+State 15
+
+    9 LOOP: LP B M • LOOP_WHILE BOOL B LIST RP M
+
+    LOOP_WHILE  shift, and go to state 29
+
+
+State 16
+
+   11 EXPR: LP • OPER ATOM ATOM RP
+
+    SUB  shift, and go to state 30
+    ADD  shift, and go to state 31
+    MUL  shift, and go to state 32
+    DIV  shift, and go to state 33
+    MOD  shift, and go to state 34
+
+    OPER  go to state 35
+
+
+State 17
+
+   13 ATOM: IDEN •
+
+    $default  reduce using rule 13 (ATOM)
+
+
+State 18
+
+   14 ATOM: NUMB •
+
+    $default  reduce using rule 14 (ATOM)
+
+
+State 19
+
+   15 ATOM: EXPR •
+
+    $default  reduce using rule 15 (ATOM)
+
+
+State 20
+
+    6 ASGN: LP SET IDEN ATOM • RP
+
+    RP  shift, and go to state 36
+
+
+State 21
+
+   21 RELN: EQ •
+
+    $default  reduce using rule 21 (RELN)
+
+
+State 22
+
+   22 RELN: NE •
+
+    $default  reduce using rule 22 (RELN)
+
+
+State 23
+
+   23 RELN: LT •
+
+    $default  reduce using rule 23 (RELN)
+
+
+State 24
+
+   24 RELN: GT •
+
+    $default  reduce using rule 24 (RELN)
+
+
+State 25
+
+   25 RELN: LE •
+
+    $default  reduce using rule 25 (RELN)
+
+
+State 26
+
+   26 RELN: GE •
+
+    $default  reduce using rule 26 (RELN)
+
+
+State 27
+
+   12 BOOL: LP RELN • ATOM ATOM RP
+
+    LP    shift, and go to state 16
+    IDEN  shift, and go to state 17
+    NUMB  shift, and go to state 18
+
+    EXPR  go to state 19
+    ATOM  go to state 37
+
+
+State 28
+
+    7 COND: LP WHEN BOOL B • LIST RP B M
+
+    LP  shift, and go to state 1
+
+    LIST  go to state 38
+    STMT  go to state 3
+    ASGN  go to state 4
+    COND  go to state 5
+    LOOP  go to state 6
+
+
+State 29
+
+    9 LOOP: LP B M LOOP_WHILE • BOOL B LIST RP M
+
+    LP  shift, and go to state 13
+
+    BOOL  go to state 39
+
+
+State 30
+
+   17 OPER: SUB •
+
+    $default  reduce using rule 17 (OPER)
+
+
+State 31
+
+   16 OPER: ADD •
+
+    $default  reduce using rule 16 (OPER)
+
+
+State 32
+
+   18 OPER: MUL •
+
+    $default  reduce using rule 18 (OPER)
+
+
+State 33
+
+   19 OPER: DIV •
+
+    $default  reduce using rule 19 (OPER)
+
+
+State 34
+
+   20 OPER: MOD •
+
+    $default  reduce using rule 20 (OPER)
+
+
+State 35
+
+   11 EXPR: LP OPER • ATOM ATOM RP
+
+    LP    shift, and go to state 16
+    IDEN  shift, and go to state 17
+    NUMB  shift, and go to state 18
+
+    EXPR  go to state 19
+    ATOM  go to state 40
+
+
+State 36
+
+    6 ASGN: LP SET IDEN ATOM RP •
+
+    $default  reduce using rule 6 (ASGN)
+
+
+State 37
+
+   12 BOOL: LP RELN ATOM • ATOM RP
+
+    LP    shift, and go to state 16
+    IDEN  shift, and go to state 17
+    NUMB  shift, and go to state 18
+
+    EXPR  go to state 19
+    ATOM  go to state 41
+
+
+State 38
+
+    7 COND: LP WHEN BOOL B LIST • RP B M
+
+    RP  shift, and go to state 42
+
+
+State 39
+
+    9 LOOP: LP B M LOOP_WHILE BOOL • B LIST RP M
+
+    $default  reduce using rule 8 (B)
+
+    B  go to state 43
+
+
+State 40
+
+   11 EXPR: LP OPER ATOM • ATOM RP
+
+    LP    shift, and go to state 16
+    IDEN  shift, and go to state 17
+    NUMB  shift, and go to state 18
+
+    EXPR  go to state 19
+    ATOM  go to state 44
+
+
+State 41
+
+   12 BOOL: LP RELN ATOM ATOM • RP
+
+    RP  shift, and go to state 45
+
+
+State 42
+
+    7 COND: LP WHEN BOOL B LIST RP • B M
+
+    $default  reduce using rule 8 (B)
+
+    B  go to state 46
+
+
+State 43
+
+    9 LOOP: LP B M LOOP_WHILE BOOL B • LIST RP M
+
+    LP  shift, and go to state 1
+
+    LIST  go to state 47
+    STMT  go to state 3
+    ASGN  go to state 4
+    COND  go to state 5
+    LOOP  go to state 6
+
+
+State 44
+
+   11 EXPR: LP OPER ATOM ATOM • RP
+
+    RP  shift, and go to state 48
+
+
+State 45
+
+   12 BOOL: LP RELN ATOM ATOM RP •
+
+    $default  reduce using rule 12 (BOOL)
+
+
+State 46
+
+    7 COND: LP WHEN BOOL B LIST RP B • M
+
+    $default  reduce using rule 10 (M)
+
+    M  go to state 49
+
+
+State 47
+
+    9 LOOP: LP B M LOOP_WHILE BOOL B LIST • RP M
+
+    RP  shift, and go to state 50
+
+
+State 48
+
+   11 EXPR: LP OPER ATOM ATOM RP •
+
+    $default  reduce using rule 11 (EXPR)
+
+
+State 49
+
+    7 COND: LP WHEN BOOL B LIST RP B M •
+
+    $default  reduce using rule 7 (COND)
+
+
+State 50
+
+    9 LOOP: LP B M LOOP_WHILE BOOL B LIST RP • M
+
+    $default  reduce using rule 10 (M)
+
+    M  go to state 51
+
+
+State 51
+
+    9 LOOP: LP B M LOOP_WHILE BOOL B LIST RP M •
+
+    $default  reduce using rule 9 (LOOP)

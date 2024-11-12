@@ -432,7 +432,11 @@ class RegisterBank
     public:
         vector<Register> Reg;
         int NumReg;
-        RegisterBank(int Num=5) :NumReg(Num) {Reg.resize(Num);}
+        RegisterBank(int Num=5) :NumReg(Num) 
+        {
+            cout << nl <<"Number of Registers Allocated : " << Num << nl << nl;
+            Reg.resize(Num);
+        }
 
         void AllocRegister(Symbol* Arg1,string &RegName1,int LineNo,int type=0)
         {
@@ -491,19 +495,22 @@ class RegisterBank
         
         void FreeRegister()
         {
-            for(list<Symbol>::iterator SymIt = GlobalST.Table.begin(); SymIt!=GlobalST.Table.end();SymIt++)
+            for(int i=0;i<NumReg;i++)
             {
-                // cout << SymIt->Name << SymIt->RegNum << "Name\n"  ;
-                if(SymIt->RegNum!=-1 &&  SymIt->Name[0]!='$')
+                // cout << SymIt->Name << SymIt->RegNum << "Name\n" 
+                for(auto SymIt: Reg[i].Symbols) 
                 {
-                    if(!Reg[SymIt->RegNum-1].LastUse)
+                    if(SymIt->RegNum!=-1 &&  SymIt->Name[0]!='$')
                     {
-                        if(!SymIt->changeVal)
+                        if(!Reg[SymIt->RegNum-1].LastUse)
                         {
-                            EmitTCG("ST",SymIt->Name,"R"+itos(SymIt->RegNum));
+                            if(!SymIt->changeVal)
+                            {
+                                EmitTCG("ST",SymIt->Name,"R"+itos(SymIt->RegNum));
+                            }
                         }
+                        SymIt->UpdateReg();
                     }
-                    SymIt->UpdateReg();
                 }
             }
 
@@ -516,12 +523,12 @@ class RegisterBank
         }
 };
 
-void createTCG(vector<Quad> IC)
+void createTCG(vector<Quad> IC,int num_regs)
 {
     EmitTCG("label","Block 1");
     string Op;
     string result;
-    RegisterBank RegBank;
+    RegisterBank RegBank(num_regs);
     string RegName1,RegName2,RegName3;
     int BC = -1;
 
@@ -660,8 +667,13 @@ void createTCG(vector<Quad> IC)
     RegBank.FreeRegister();
 }
 
-int main() 
-{
+int main(int argc,char** argv) 
+{   
+    int num_regs = 5;
+    if(argc==2)
+    {
+        num_regs = atoi(argv[1]);
+    }
     cout << "\nStarting Intermediate Code Generation..." << endl;
     yyparse(); // Parse the input
     cout << "Intermediate Code Generated Successfully.\n" << endl;
@@ -691,7 +703,7 @@ int main()
     // }
 
     cout << "Starting Target Code Generation..." << endl;
-    createTCG(QuadList.InstructionList);
+    createTCG(QuadList.InstructionList,num_regs);
     cout << "Target Code Generated Successfully.\n" << endl;
 
     cout << "Saving Target Code to 'TCG.txt'..." << endl;

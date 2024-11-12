@@ -1,7 +1,7 @@
 .SUFFIXES:
 
 all: codegen.out
-	./codegen.out < sample.txt
+	./codegen.out < sample.txt 5
 
 codegen.out: codegen.cpp lex.yy.c y.tab.c y.tab.h
 	g++ -o codegen.out codegen.cpp
